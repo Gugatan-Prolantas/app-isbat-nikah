@@ -1,6 +1,8 @@
 import streamlit as st
 import datetime
 from io import BytesIO
+import sqlite3
+import json
 
 # Try importing python-docx for Word file generation
 try:
@@ -21,6 +23,63 @@ INDONESIAN_MONTHS = [
     "Januari", "Februari", "Maret", "April", "Mei", "Juni",
     "Juli", "Agustus", "September", "Oktober", "November", "Desember"
 ]
+
+# --- SETUP DATABASE SQLITE ---
+def init_db():
+    """Inisialisasi database SQLite dan membuat tabel jika belum ada."""
+    conn = sqlite3.connect('isbat_nikah.db')
+    c = conn.cursor()
+    c.execute('''
+        CREATE TABLE IF NOT EXISTS permohonan (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            tgl_input TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            nama_p1 TEXT,
+            nik_p1 TEXT,
+            nama_p2 TEXT,
+            nik_p2 TEXT,
+            data_json TEXT
+        )
+    ''')
+    conn.commit()
+    conn.close()
+
+# Jalankan inisialisasi database saat aplikasi dimulai
+init_db()
+
+class DateEncoder(json.JSONEncoder):
+    """Bantuan untuk melakukan encode data tanggal (datetime) menjadi string untuk JSON"""
+    def default(self, obj):
+        if isinstance(obj, datetime.date):
+            return obj.isoformat()
+        return super().default(obj)
+
+def simpan_ke_db(form_data):
+    """Menyimpan data dari form ke dalam database SQLite."""
+    conn = sqlite3.connect('isbat_nikah.db')
+    c = conn.cursor()
+    # Ubah seluruh data form menjadi string JSON agar mudah direkonstruksi jika perlu
+    json_data = json.dumps(form_data, cls=DateEncoder)
+    c.execute('''
+        INSERT INTO permohonan (nama_p1, nik_p1, nama_p2, nik_p2, data_json)
+        VALUES (?, ?, ?, ?, ?)
+    ''', (
+        form_data['p1']['nama'], 
+        form_data['p1']['nik'], 
+        form_data['p2']['nama'], 
+        form_data['p2']['nik'], 
+        json_data
+    ))
+    conn.commit()
+    conn.close()
+
+def load_data_db():
+    """Mengambil ringkasan data tersimpan dari database."""
+    conn = sqlite3.connect('isbat_nikah.db')
+    c = conn.cursor()
+    c.execute('SELECT id, tgl_input, nama_p1, nik_p1, nama_p2, nik_p2 FROM permohonan ORDER BY id DESC')
+    data = c.fetchall()
+    conn.close()
+    return data
 
 def format_indo_date(dt):
     """Format datetime object into Indonesian date string."""
@@ -76,22 +135,22 @@ Yang bertanda tangan di bawah ini :
 Nama\t\t\t: {p1['nama']} 
 NIK\t\t\t: {p1['nik']}
 Tempat Tgl Lahir\t: {p1['tempat_lahir']}, {format_indo_date(p1['tgl_lahir'])} (umur {p1['umur']} tahun)
-Agama \t\t: Islam
+Agama \t\t\t: Islam
 Pekerjaan \t\t: {p1['pekerjaan']}
 Pendidikan \t\t: {p1['pendidikan']}
 Nomor telepon\t\t: {p1['telepon']}
 Email\t\t\t: {p1['email']}
-Alamat\t\t: {p1['alamat']}, selanjutnya disebut sebagai Pemohon I;
+Alamat\t\t\t: {p1['alamat']}, selanjutnya disebut sebagai Pemohon I;
 
 Nama\t\t\t: {p2['nama']} 
 NIK\t\t\t: {p2['nik']}
 Tempat Tgl Lahir\t: {p2['tempat_lahir']}, {format_indo_date(p2['tgl_lahir'])} (umur {p2['umur']} tahun)
-Agama \t\t: Islam
+Agama \t\t\t: Islam
 Pekerjaan \t\t: {p2['pekerjaan']}
 Pendidikan \t\t: {p2['pendidikan']}
 Nomor telepon\t\t: {p2['telepon']}
 Email\t\t\t: {p2['email']}
-Alamat\t\t: {p2['alamat']}, selanjutnya disebut sebagai Pemohon II;
+Alamat\t\t\t: {p2['alamat']}, selanjutnya disebut sebagai Pemohon II;
 
 Dengan ini mengajukan pemohonan pengesahan nikah, dengan alasan sebagai berikut:
 
@@ -169,12 +228,12 @@ def generate_docx(data):
             f"Nama\t\t\t: {applicant['nama']}\n"
             f"NIK\t\t\t: {applicant['nik']}\n"
             f"Tempat Tgl Lahir\t: {applicant['tempat_lahir']}, {format_indo_date(applicant['tgl_lahir'])} (umur {applicant['umur']} tahun)\n"
-            f"Agama\t\t: Islam\n"
+            f"Agama\t\t\t: Islam\n"
             f"Pekerjaan\t\t: {applicant['pekerjaan']}\n"
             f"Pendidikan\t\t: {applicant['pendidikan']}\n"
             f"Nomor telepon\t: {applicant['telepon']}\n"
             f"Email\t\t\t: {applicant['email']}\n"
-            f"Alamat\t\t: {applicant['alamat']}, selanjutnya disebut sebagai {title};\n"
+            f"Alamat\t\t\t: {applicant['alamat']}, selanjutnya disebut sebagai {title};\n"
         )
         p.add_run(fmt)
 
@@ -523,7 +582,17 @@ with col_preview:
     
     st.text_area("Hasil Draf Surat Permohonan", value=letter_text, height=620)
 
-    st.subheader("Unduh Dokumen Hasil Generator")
+    st.subheader("Simpan & Unduh Dokumen")
+    
+    # Tombol Simpan ke Database
+    if st.button("💾 Simpan Data ke Database", type="primary", use_container_width=True):
+        try:
+            simpan_ke_db(form_data)
+            st.success(f"✅ Data atas nama {nama_p1} & {nama_p2} berhasil disimpan ke database!")
+        except Exception as e:
+            st.error(f"Gagal menyimpan data: {e}")
+            
+    st.write("---")
     
     if DOCX_AVAILABLE:
         docx_file = generate_docx(form_data)
@@ -542,3 +611,24 @@ with col_preview:
         mime="text/plain",
         use_container_width=True
     )
+
+# --- BAGIAN BAWAH: VIEWER DATABASE ---
+st.divider()
+st.header("🗄️ Rekap Data Tersimpan")
+with st.expander("Klik untuk melihat histori data yang telah dimasukkan ke database"):
+    db_data = load_data_db()
+    if db_data:
+        # Mengubah data mentah SQLite menjadi format list dictionary (mirip dataframe) agar tabel rapi
+        df_data = [
+            {
+                "ID": row[0],
+                "Waktu Input (UTC)": row[1],
+                "Nama Pemohon I": row[2],
+                "NIK Pemohon I": row[3],
+                "Nama Pemohon II": row[4],
+                "NIK Pemohon II": row[5]
+            } for row in db_data
+        ]
+        st.dataframe(df_data, use_container_width=True)
+    else:
+        st.info("Belum ada data yang tersimpan di dalam database.")
