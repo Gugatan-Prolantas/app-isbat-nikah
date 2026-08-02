@@ -631,23 +631,44 @@ with col_preview:
         use_container_width=True
     )
 
-# --- BAGIAN BAWAH: VIEWER DATABASE ---
+# --- BAGIAN BAWAH: VIEWER DATABASE (DIKUNCI PASSWORD) ---
 st.divider()
-st.header("🗄️ Rekap Data Tersimpan")
-with st.expander("Klik untuk melihat histori data yang telah dimasukkan ke database"):
-    db_data = load_data_db()
-    if db_data:
-        # Mengubah data mentah SQLite menjadi format list dictionary (mirip dataframe) agar tabel rapi
-        df_data = [
-            {
-                "ID": row[0],
-                "Waktu Input (UTC)": row[1],
-                "Nama Pemohon I": row[2],
-                "NIK Pemohon I": row[3],
-                "Nama Pemohon II": row[4],
-                "NIK Pemohon II": row[5]
-            } for row in db_data
-        ]
-        st.dataframe(df_data, use_container_width=True)
-    else:
-        st.info("Belum ada data yang tersimpan di dalam database.")
+st.header("🗄️ Rekap Data Tersimpan (Khusus Admin)")
+
+# Membuat sistem login sederhana menggunakan session state
+if "admin_logged_in" not in st.session_state:
+    st.session_state.admin_logged_in = False
+
+if not st.session_state.admin_logged_in:
+    st.info("Silakan masukkan kata sandi untuk melihat database.")
+    password_input = st.text_input("Kata Sandi Admin", type="password")
+    
+    # Ganti "rahasia123" dengan password yang Anda inginkan!
+    if st.button("Buka Database"):
+        if password_input == "rahasia123": 
+            st.session_state.admin_logged_in = True
+            st.rerun()
+        else:
+            st.error("Kata sandi salah!")
+else:
+    if st.button("🔒 Tutup & Kunci Database"):
+        st.session_state.admin_logged_in = False
+        st.rerun()
+        
+    with st.expander("Klik untuk melihat histori data yang telah dimasukkan ke database", expanded=True):
+        db_data = load_data_db()
+        if db_data:
+            # Mengubah data mentah SQLite menjadi format list dictionary (mirip dataframe) agar tabel rapi
+            df_data = [
+                {
+                    "ID": row[0],
+                    "Waktu Input (UTC)": row[1],
+                    "Nama Pemohon I": row[2],
+                    "NIK Pemohon I": row[3],
+                    "Nama Pemohon II": row[4],
+                    "NIK Pemohon II": row[5]
+                } for row in db_data
+            ]
+            st.dataframe(df_data, use_container_width=True)
+        else:
+            st.info("Belum ada data yang tersimpan di dalam database.")
