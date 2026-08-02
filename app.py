@@ -44,73 +44,80 @@ def build_letter_text(data):
     
     tgl_surat_str = format_indo_date(data['tgl_permohonan'])
     
-    # Children text
+    # Anak text
     anak_str = "belum / tidak dikaruniai anak."
     if data['status_anak'] == 'sudah' and data['anak_list']:
         anak_lines = [f"telah dikaruniai {len(data['anak_list'])} orang anak, yaitu:"]
         for idx, child in enumerate(data['anak_list'], 1):
             c_ttl = f"{child['tempat']}, {format_indo_date(child['tgl_lahir'])}"
-            anak_lines.append(f"   {idx}. {child['nama']}, tempat/tgl lahir: {c_ttl} (umur {child['umur']} tahun)")
+            anak_lines.append(f"    {idx}. {child['nama']}, tempat/tgl lahir: {c_ttl} (umur {child['umur']} tahun)")
         anak_str = "\n".join(anak_lines)
 
     # Wali text
-    wali_str = data['hubungan_wali']
-    if data['hubungan_wali'] != 'Ayah Kandung' and data['alasan_wali']:
-        wali_str += f" ({data['alasan_wali']})"
+    alasan_wali_str = f" {data['alasan_wali']}" if data['hubungan_wali'] != 'Ayah Kandung' and data['alasan_wali'] else ""
+    wali_str = f"{data['hubungan_wali']} Pemohon II bernama {data['nama_wali']}{alasan_wali_str}"
 
-    # Handle optional status details gracefully to avoid blank lines
-    status_detail_p1 = f"\n   Keterangan       : {p1['detail_status_text']}" if p1['detail_status_text'] else ""
-    status_detail_p2 = f"\n   Keterangan       : {p2['detail_status_text']}" if p2['detail_status_text'] else ""
+    # Status details text (if any)
+    stat_p1 = f"{p1['status']} ({p1['detail_status_text']})" if p1['detail_status_text'] else p1['status']
+    stat_p2 = f"{p2['status']} ({p2['detail_status_text']})" if p2['detail_status_text'] else p2['status']
 
-    text = f"""PERMOHONAN ISBAT NIKAH (PENGESAHAN NIKAH)
+    text = f"""Hal : Permohonan Isbat Nikah\t\tPurwokerto, {tgl_surat_str}
 
-Hal : Permohonan Isbat Nikah
-Purwokerto, {tgl_surat_str}
+        Kepada
+Yth. Ketua Pengadilan Agama Purwokerto
+di
+Purwokerto.
 
-Kepada Yth.
-Ketua Pengadilan Agama Purwokerto
-di Tempat
+Assalamu Alaikum Wr. Wb.
 
-Dengan hormat, kami yang bertanda tangan di bawah ini:
+Dengan hormat,
+Yang bertanda tangan di bawah ini :
 
-1. NAMA             : {p1['nama']}
-   NIK              : {p1['nik']}
-   Tempat/Tgl Lahir : {p1['tempat_lahir']}, {format_indo_date(p1['tgl_lahir'])} (Umur: {p1['umur']} tahun)
-   Pekerjaan        : {p1['pekerjaan']}
-   Pendidikan       : {p1['pendidikan']}
-   Status           : {p1['status']}{status_detail_p1}
-   Alamat           : {p1['alamat']}
-   No. Telepon      : {p1['telepon']}
-   Email            : {p1['email']}
+Nama\t\t\t: {p1['nama']} 
+NIK\t\t\t: {p1['nik']}
+Tempat Tgl Lahir\t: {p1['tempat_lahir']}, {format_indo_date(p1['tgl_lahir'])} (umur {p1['umur']} tahun)
+Agama \t\t\t: Islam
+Pekerjaan \t\t: {p1['pekerjaan']}
+Pendidikan \t\t: {p1['pendidikan']}
+Nomor telepon\t\t: {p1['telepon']}
+Email\t\t\t: {p1['email']}
+Alamat\t\t\t: {p1['alamat']}, selanjutnya disebut sebagai Pemohon I;
 
-2. NAMA             : {p2['nama']}
-   NIK              : {p2['nik']}
-   Tempat/Tgl Lahir : {p2['tempat_lahir']}, {format_indo_date(p2['tgl_lahir'])} (Umur: {p2['umur']} tahun)
-   Pekerjaan        : {p2['pekerjaan']}
-   Pendidikan       : {p2['pendidikan']}
-   Status           : {p2['status']}{status_detail_p2}
-   Alamat           : {p2['alamat']}
-   No. Telepon      : {p2['telepon']}
-   Email            : {p2['email']}
+Nama\t\t\t: {p2['nama']} 
+NIK\t\t\t: {p2['nik']}
+Tempat Tgl Lahir\t: {p2['tempat_lahir']}, {format_indo_date(p2['tgl_lahir'])} (umur {p2['umur']} tahun)
+Agama \t\t\t: Islam
+Pekerjaan \t\t: {p2['pekerjaan']}
+Pendidikan \t\t: {p2['pendidikan']}
+Nomor telepon\t\t: {p2['telepon']}
+Email\t\t\t: {p2['email']}
+Alamat\t\t\t: {p2['alamat']}, selanjutnya disebut sebagai Pemohon II;
 
-Selanjutnya disebut sebagai Pemohon I dan Pemohon II.
+Dengan ini mengajukan permohonan isbat nikah, dengan alasan sebagai berikut:
 
-Menyatakan bahwa Pemohon I dan Pemohon II telah melangsungkan pernikahan secara syariat Islam pada tanggal {format_indo_date(data['tgl_nikah'])} di {data['tempat_nikah']}.
-Pernikahan tersebut dilaksanakan dengan wali nikah {data['nama_wali']} selaku {wali_str}, di hadapan {data['yang_menikahkan']}, disaksikan oleh dua orang saksi bernama {data['saksi1']} dan {data['saksi2']}, dengan mas kawin/mahar berupa {data['mahar']}.
+1.\tBahwa Pemohon I dan Pemohon II telah menikah menurut agama Islam pada tanggal {format_indo_date(data['tgl_nikah'])} di {data['tempat_nikah']} dengan wali nikah adalah {wali_str}, yang dinikahkan oleh {data['yang_menikahkan']}, dengan maskawin berupa {data['mahar']}, dan dihadiri oleh dua orang saksi masing-masing bernama {data['saksi1']} dan {data['saksi2']};
+2.\tBahwa antara Pemohon I dan Pemohon II tidak ada halangan untuk melangsungkan pernikahan, baik halangan Syara’ maupun halangan undang-undang, dan tidak pernah ada yang keberatan atas pernikahan Pemohon I dengan Pemohon II;
+3.\tBahwa saat menikah Pemohon I berstatus {stat_p1} dan Pemohon II berstatus {stat_p2};
+4.\tBahwa dari pernikahan tersebut, Pemohon I dan Pemohon II {anak_str}
+5.\t{data['alasan_tidak_mencatatkan']}
+6.\tBahwa maksud permohonan isbat nikah para Pemohon adalah untuk {data['alasan_mohon']};
 
-Bahwa selama pernikahan tersebut, Pemohon I dan Pemohon II {anak_str}
+Bahwa berdasarkan alasan-alasan tersebut di atas para Pemohon mohon kepada Ketua Pengadilan Agama Purwokerto cq. Majelis hakim yang memeriksa perkara ini berkenan menetapkan sebagai berikut :
 
-Bahwa {data['alasan_tidak_mencatatkan']}
+Primer :
+1.\tMengabulkan permohonan para Pemohon;
+2.\tMenyatakan sah perkawinan antara Pemohon I {p1['nama']} dengan Pemohon II, {p2['nama']} yang dilaksanakan pada tanggal {format_indo_date(data['tgl_nikah'])} di {data['tempat_nikah']};
+3.\tMenetapkan biaya perkara menurut ketentuan hukum dan perundang-undangan yang berlaku;
 
-Maksud permohonan ini adalah untuk {data['alasan_mohon']}.
+Subsider :
+-\tAtau bilamana majelis hakim yang memeriksa perkara ini berpendapat lain, mohon penetapan yang seadil-adilnya;
 
-Hormat kami,
+Demikian permohonan para Pemohon, dan atas terkabulnya para Pemohon ucapkan terima kasih.
+
+Wassalam
 
 
-Pemohon I                                        Pemohon II
-
-
-( {p1['nama']} )                                 ( {p2['nama']} )
+Pemohon I, {p1['nama']} \t\t\t\t\tPemohon II, {p2['nama']}
 """
     return text
 
@@ -120,6 +127,12 @@ def generate_docx(data):
         return None
 
     doc = docx.Document()
+    
+    # Set default font
+    style = doc.styles['Normal']
+    font = style.font
+    font.name = 'Arial'
+    font.size = Pt(12)
     
     # Page setup
     for section in doc.sections:
@@ -132,71 +145,91 @@ def generate_docx(data):
     p2 = data['p2']
     tgl_surat_str = format_indo_date(data['tgl_permohonan'])
 
-    # Title
-    title = doc.add_paragraph()
-    title_run = title.add_run("PERMOHONAN ISBAT NIKAH (PENGESAHAN NIKAH)")
-    title_run.bold = True
-    title_run.font.size = Pt(14)
-    title.alignment = WD_ALIGN_PARAGRAPH.CENTER
-
     # Header Date
     p_header = doc.add_paragraph()
-    p_header.add_run(f"Hal : Permohonan Isbat Nikah\t\t\t\tPurwokerto, {tgl_surat_str}")
+    p_header.add_run(f"Hal : Permohonan Isbat Nikah\t\t\tPurwokerto, {tgl_surat_str}")
 
-    doc.add_paragraph("\nKepada Yth.\nKetua Pengadilan Agama Purwokerto\ndi Tempat\n")
-    doc.add_paragraph("Dengan hormat, kami yang bertanda tangan di bawah ini:")
+    doc.add_paragraph("\n\tKepada\nYth. Ketua Pengadilan Agama Purwokerto\ndi\nPurwokerto.\n")
+    
+    doc.add_paragraph("Assalamu Alaikum Wr. Wb.\n")
+    doc.add_paragraph("Dengan hormat,\nYang bertanda tangan di bawah ini :")
 
-    # Function to add applicant profile
-    def add_applicant_data(num, applicant):
+    # Helper function to add biodata with tabs
+    def add_biodata_docx(applicant, title):
         p = doc.add_paragraph()
-        p.paragraph_format.left_indent = Inches(0.2)
-        p.add_run(f"{num}. Nama: ").bold = True
-        p.add_run(f"{applicant['nama']}\n")
-        p.add_run(f"   NIK: {applicant['nik']}\n")
-        p.add_run(f"   TTL: {applicant['tempat_lahir']}, {format_indo_date(applicant['tgl_lahir'])} ({applicant['umur']} tahun)\n")
-        p.add_run(f"   Pekerjaan: {applicant['pekerjaan']}\n")
-        p.add_run(f"   Pendidikan: {applicant['pendidikan']}\n")
-        p.add_run(f"   Status: {applicant['status']}\n")
-        if applicant['detail_status_text']:
-            p.add_run(f"   Keterangan: {applicant['detail_status_text']}\n")
-        p.add_run(f"   Alamat: {applicant['alamat']}\n")
-        p.add_run(f"   No. Telp: {applicant['telepon']}\n")
-        p.add_run(f"   Email: {applicant['email']}")
+        fmt = (
+            f"Nama\t\t\t: {applicant['nama']}\n"
+            f"NIK\t\t\t: {applicant['nik']}\n"
+            f"Tempat Tgl Lahir\t: {applicant['tempat_lahir']}, {format_indo_date(applicant['tgl_lahir'])} (umur {applicant['umur']} tahun)\n"
+            f"Agama\t\t\t: Islam\n"
+            f"Pekerjaan\t\t: {applicant['pekerjaan']}\n"
+            f"Pendidikan\t\t: {applicant['pendidikan']}\n"
+            f"Nomor telepon\t: {applicant['telepon']}\n"
+            f"Email\t\t\t: {applicant['email']}\n"
+            f"Alamat\t\t\t: {applicant['alamat']}, selanjutnya disebut sebagai {title};\n"
+        )
+        p.add_run(fmt)
 
-    add_applicant_data(1, p1)
-    add_applicant_data(2, p2)
+    add_biodata_docx(p1, "Pemohon I")
+    add_biodata_docx(p2, "Pemohon II")
 
-    doc.add_paragraph("\nSelanjutnya disebut sebagai Pemohon I dan Pemohon II.\n")
+    doc.add_paragraph("Dengan ini mengajukan permohonan isbat nikah, dengan alasan sebagai berikut:")
 
-    # Marriage details
-    wali_str = data['hubungan_wali']
-    if data['hubungan_wali'] != 'Ayah Kandung' and data['alasan_wali']:
-        wali_str += f" ({data['alasan_wali']})"
+    # Status details
+    stat_p1 = f"{p1['status']} ({p1['detail_status_text']})" if p1['detail_status_text'] else p1['status']
+    stat_p2 = f"{p2['status']} ({p2['detail_status_text']})" if p2['detail_status_text'] else p2['status']
 
-    doc.add_paragraph(
-        f"Menyatakan bahwa Pemohon I dan Pemohon II telah melangsungkan pernikahan secara syariat Islam "
-        f"pada tanggal {format_indo_date(data['tgl_nikah'])} di {data['tempat_nikah']}. "
-        f"Pernikahan tersebut dilaksanakan dengan wali nikah {data['nama_wali']} selaku {wali_str}, "
-        f"di hadapan {data['yang_menikahkan']}, disaksikan oleh dua orang saksi bernama {data['saksi1']} dan {data['saksi2']}, "
-        f"dengan mas kawin/mahar berupa {data['mahar']}."
-    )
-
-    # Children
+    # Wali text
+    alasan_wali_str = f" {data['alasan_wali']}" if data['hubungan_wali'] != 'Ayah Kandung' and data['alasan_wali'] else ""
+    wali_str = f"{data['hubungan_wali']} Pemohon II bernama {data['nama_wali']}{alasan_wali_str}"
+    
+    # Children text
+    anak_str = "belum / tidak dikaruniai anak"
     if data['status_anak'] == 'sudah' and data['anak_list']:
-        p_child = doc.add_paragraph(f"Bahwa selama pernikahan tersebut, Pemohon I dan Pemohon II telah dikaruniai {len(data['anak_list'])} orang anak, yaitu:")
+        anak_lines = [f"telah dikaruniai {len(data['anak_list'])} orang anak, yaitu:"]
         for idx, child in enumerate(data['anak_list'], 1):
             c_ttl = f"{child['tempat']}, {format_indo_date(child['tgl_lahir'])}"
-            doc.add_paragraph(f"{idx}. {child['nama']} (TTL: {c_ttl}, Umur: {child['umur']} tahun)", style='List Bullet')
-    else:
-        doc.add_paragraph("Bahwa selama pernikahan tersebut, Pemohon I dan Pemohon II belum / tidak dikaruniai anak.")
+            anak_lines.append(f"    {idx}. {child['nama']}, tempat/tgl lahir: {c_ttl} (umur {child['umur']} tahun)")
+        anak_str = "\n".join(anak_lines)
 
-    doc.add_paragraph(f"Bahwa {data['alasan_tidak_mencatatkan']}")
-    doc.add_paragraph(f"Maksud permohonan ini adalah untuk {data['alasan_mohon']}.\n")
+    p_posita = doc.add_paragraph()
+    p_posita.add_run(f"1.\tBahwa Pemohon I dan Pemohon II telah menikah menurut agama Islam pada tanggal {format_indo_date(data['tgl_nikah'])} di {data['tempat_nikah']} dengan wali nikah adalah {wali_str}, yang dinikahkan oleh {data['yang_menikahkan']}, dengan maskawin berupa {data['mahar']}, dan dihadiri oleh dua orang saksi masing-masing bernama {data['saksi1']} dan {data['saksi2']};\n")
+    p_posita.add_run("2.\tBahwa antara Pemohon I dan Pemohon II tidak ada halangan untuk melangsungkan pernikahan, baik halangan Syara’ maupun halangan undang-undang, dan tidak pernah ada yang keberatan atas pernikahan Pemohon I dengan Pemohon II;\n")
+    p_posita.add_run(f"3.\tBahwa saat menikah Pemohon I berstatus {stat_p1} dan Pemohon II berstatus {stat_p2};\n")
+    p_posita.add_run(f"4.\tBahwa dari pernikahan tersebut, Pemohon I dan Pemohon II {anak_str};\n")
+    p_posita.add_run(f"5.\t{data['alasan_tidak_mencatatkan']}\n")
+    p_posita.add_run(f"6.\tBahwa maksud permohonan isbat nikah para Pemohon adalah untuk {data['alasan_mohon']};\n")
 
-    # Signatures
-    p_sig = doc.add_paragraph()
-    p_sig.add_run("Pemohon I\t\t\t\t\t\tPemohon II\n\n\n\n")
-    p_sig.add_run(f"( {p1['nama']} )\t\t\t\t\t( {p2['nama']} )").bold = True
+    doc.add_paragraph("Bahwa berdasarkan alasan-alasan tersebut di atas para Pemohon mohon kepada Ketua Pengadilan Agama Purwokerto cq. Majelis hakim yang memeriksa perkara ini berkenan menetapkan sebagai berikut :")
+    
+    p_petitum = doc.add_paragraph()
+    p_petitum.add_run("Primer :\n")
+    p_petitum.add_run("1.\tMengabulkan permohonan para Pemohon;\n")
+    p_petitum.add_run(f"2.\tMenyatakan sah perkawinan antara Pemohon I {p1['nama']} dengan Pemohon II, {p2['nama']} yang dilaksanakan pada tanggal {format_indo_date(data['tgl_nikah'])} di {data['tempat_nikah']};\n")
+    p_petitum.add_run("3.\tMenetapkan biaya perkara menurut ketentuan hukum dan perundang-undangan yang berlaku;\n\n")
+    p_petitum.add_run("Subsider :\n")
+    p_petitum.add_run("-\tAtau bilamana majelis hakim yang memeriksa perkara ini berpendapat lain, mohon penetapan yang seadil-adilnya;")
+
+    doc.add_paragraph("Demikian permohonan para Pemohon, dan atas terkabulnya para Pemohon ucapkan terima kasih.\n\nWassalam\n\n")
+
+    # Signatures Table for alignment
+    table = doc.add_table(rows=3, cols=2)
+    table.autofit = True
+    
+    cell_1 = table.cell(0, 0)
+    cell_2 = table.cell(0, 1)
+    
+    cell_1.paragraphs[0].text = "Pemohon I,"
+    cell_2.paragraphs[0].text = "Pemohon II,"
+    
+    # Add empty spacing for signature
+    table.cell(1, 0).paragraphs[0].add_run("\n\n")
+    
+    cell_1_name = table.cell(2, 0)
+    cell_2_name = table.cell(2, 1)
+    
+    cell_1_name.paragraphs[0].text = p1['nama']
+    cell_2_name.paragraphs[0].text = p2['nama']
 
     buffer = BytesIO()
     doc.save(buffer)
