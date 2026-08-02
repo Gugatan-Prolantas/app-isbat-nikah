@@ -24,9 +24,121 @@ except ImportError:
 
 st.set_page_config(
     page_title="Generator Surat Permohonan Isbat Nikah",
-    page_icon="📄",
+    page_icon="⚖️",
     layout="wide"
 )
+
+def apply_custom_theme():
+    custom_css = """
+    <style>
+        /* Mengatur latar belakang aplikasi agar lembut di mata (Off-White/Cream) */
+        .stApp {
+            background-color: #FAFAFA;
+        }
+        
+        /* Kustomisasi Judul Utama (H1) */
+        h1 {
+            color: #0B4A2D !important; /* Hijau Tua Pengadilan */
+            text-align: center;
+            font-family: 'Georgia', serif;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.1);
+        }
+        
+        /* Kustomisasi Sub-judul (H2, H3) */
+        h2, h3 {
+            color: #115E59 !important; /* Hijau Zamrud */
+            border-bottom: 2px solid #D4AF37; /* Garis bawah Kuning Emas */
+            padding-bottom: 5px;
+            font-family: 'Georgia', serif;
+        }
+
+        /* Kustomisasi Kotak Form (Expander) */
+        .streamlit-expanderHeader {
+            background-color: #EBF3EE !important; /* Hijau sangat muda */
+            color: #0B4A2D !important;
+            font-weight: 600 !important;
+            border-radius: 5px;
+            border-left: 5px solid #D4AF37 !important; /* Aksen emas di sisi kiri */
+            font-size: 1.1rem;
+        }
+        
+        /* Kustomisasi Tombol Utama (Primary) - Tombol Simpan */
+        button[kind="primary"] {
+            background-color: #0B4A2D !important;
+            color: #D4AF37 !important;
+            border: 1px solid #D4AF37 !important;
+            border-radius: 8px !important;
+            font-weight: bold !important;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            transition: all 0.3s ease;
+        }
+        button[kind="primary"]:hover {
+            background-color: #D4AF37 !important;
+            color: #0B4A2D !important;
+            border: 1px solid #0B4A2D !important;
+            box-shadow: 0 6px 8px rgba(0,0,0,0.15);
+            transform: translateY(-2px);
+        }
+
+        /* Kustomisasi Tombol Sekunder (Download) */
+        button[kind="secondary"] {
+            background-color: #ffffff !important;
+            color: #0B4A2D !important;
+            border: 1px solid #0B4A2D !important;
+            border-radius: 8px !important;
+            font-weight: 600 !important;
+            transition: all 0.3s ease;
+        }
+        button[kind="secondary"]:hover {
+            background-color: #0B4A2D !important;
+            color: #ffffff !important;
+            border: 1px solid #D4AF37 !important;
+        }
+        
+        /* Kotak Notifikasi / Info */
+        .stAlert {
+            background-color: #F0FDF4;
+            border-left: 4px solid #16A34A;
+            color: #14532D;
+            border-radius: 5px;
+        }
+
+        /* Garis Pemisah (Divider) mewah */
+        hr {
+            border: 0;
+            height: 2px;
+            background-image: linear-gradient(to right, transparent, #D4AF37, transparent);
+        }
+        
+        /* Kustomisasi Header Aplikasi */
+        .header-banner {
+            background-color: #0B4A2D;
+            padding: 20px;
+            border-radius: 10px;
+            border-bottom: 4px solid #D4AF37;
+            text-align: center;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+        .header-title {
+            color: #D4AF37;
+            font-size: 2.2rem;
+            font-weight: bold;
+            margin: 0;
+            font-family: 'Georgia', serif;
+        }
+        .header-subtitle {
+            color: #EBF3EE;
+            font-size: 1.1rem;
+            margin-top: 5px;
+            font-style: italic;
+        }
+    </style>
+    """
+    st.markdown(custom_css, unsafe_allow_html=True)
+
+# Panggil fungsi tema
+apply_custom_theme()
 
 INDONESIAN_MONTHS = [
     "Januari", "Februari", "Maret", "April", "Mei", "Juni",
@@ -34,15 +146,11 @@ INDONESIAN_MONTHS = [
 ]
 
 def format_indo_date(dt):
-    """Format datetime object into Indonesian date string."""
-    if not dt:
-        return ""
+    if not dt: return ""
     return f"{dt.day} {INDONESIAN_MONTHS[dt.month - 1]} {dt.year}"
 
 def calculate_age(birth_date, target_date):
-    """Calculate age in years based on birth date and target date."""
-    if not birth_date or not target_date:
-        return 0
+    if not birth_date or not target_date: return 0
     age = target_date.year - birth_date.year
     if (target_date.month, target_date.day) < (birth_date.month, birth_date.day):
         age -= 1
@@ -71,12 +179,10 @@ def save_to_db(data):
         c = conn.cursor()
         waktu_input = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         data_json = json.dumps(data, default=str)
-        
         c.execute('''
             INSERT INTO permohonan (waktu_input, nama_p1, nik_p1, nama_p2, nik_p2, data_json)
             VALUES (?, ?, ?, ?, ?, ?)
         ''', (waktu_input, data['p1']['nama'], data['p1']['nik'], data['p2']['nama'], data['p2']['nik'], data_json))
-        
         conn.commit()
         conn.close()
         return True
@@ -94,33 +200,30 @@ def load_data_db():
     except:
         return []
 
-# Inisialisasi Database saat aplikasi dimulai
 init_db()
 
 def build_letter_text(data):
-    """Build formatted plain text for letter preview and text download."""
     p1 = data['p1']
     p2 = data['p2']
     tgl_surat_str = format_indo_date(data['tgl_permohonan'])
     
-    # Children text
+    # Text Anak
     anak_str = "belum dikaruniai anak"
     if data['status_anak'] == 'sudah' and data['anak_list']:
         anak_str = f"telah dikaruniai {len(data['anak_list'])} orang anak, yaitu:\n"
         for idx, child in enumerate(data['anak_list'], 1):
             c_ttl = f"{child['tempat']}, {format_indo_date(child['tgl_lahir'])}"
-            anak_str += f"      {idx}. {child['nama']}, lahir di {c_ttl} (umur {child['umur']} tahun)\n"
-    
-    # Wali text
+            anak_str += f"\t{idx}. {child['nama']}, lahir di {c_ttl} (umur {child['umur']} tahun)\n"
+        anak_str = anak_str.strip()
+
     wali_str = data['hubungan_wali']
     if data['hubungan_wali'] != 'Ayah Kandung' and data['alasan_wali']:
         wali_str += f" {data['alasan_wali']}"
 
-    # Status text
     status_p1_full = p1['status'] + (f" ({p1['detail_status_text']})" if p1['detail_status_text'] else "")
     status_p2_full = p2['status'] + (f" ({p2['detail_status_text']})" if p2['detail_status_text'] else "")
 
-    text = f"""Hal : Permohonan Pengesahan Nikah\t\t\t\tPurwokerto, {tgl_surat_str}
+    text = f"""Hal : Permohonan Isbat Nikah\t\t\t\tPurwokerto, {tgl_surat_str}
 
 Kepada
 Yth. Ketua Pengadilan Agama Purwokerto
@@ -135,63 +238,61 @@ Yang bertanda tangan di bawah ini :
 Nama\t\t\t: {p1['nama']}
 NIK\t\t\t: {p1['nik']}
 Tempat Tgl Lahir\t: {p1['tempat_lahir']}, {format_indo_date(p1['tgl_lahir'])} (umur {p1['umur']} tahun)
-Agama\t\t\t: Islam
+Agama\t\t: Islam
 Pekerjaan\t\t: {p1['pekerjaan']}
 Pendidikan\t\t: {p1['pendidikan']}
 Nomor telepon\t\t: {p1['telepon']}
 Email\t\t\t: {p1['email']}
-Alamat\t\t\t: {p1['alamat']}, selanjutnya disebut sebagai Pemohon I;
+Alamat\t\t: {p1['alamat']}, selanjutnya disebut sebagai Pemohon I;
 
 Nama\t\t\t: {p2['nama']}
 NIK\t\t\t: {p2['nik']}
 Tempat Tgl Lahir\t: {p2['tempat_lahir']}, {format_indo_date(p2['tgl_lahir'])} (umur {p2['umur']} tahun)
-Agama\t\t\t: Islam
+Agama\t\t: Islam
 Pekerjaan\t\t: {p2['pekerjaan']}
 Pendidikan\t\t: {p2['pendidikan']}
 Nomor telepon\t\t: {p2['telepon']}
 Email\t\t\t: {p2['email']}
-Alamat\t\t\t: {p2['alamat']}, selanjutnya disebut sebagai Pemohon II;
+Alamat\t\t: {p2['alamat']}, selanjutnya disebut sebagai Pemohon II;
 
 Dengan ini mengajukan pemohonan pengesahan nikah, dengan alasan sebagai berikut:
 
-1. Bahwa Pemohon I dan Pemohon II telah menikah menurut agama Islam pada tanggal {format_indo_date(data['tgl_nikah'])} di {data['tempat_nikah']} dengan wali nikah adalah {wali_str} bernama {data['nama_wali']}, yang dinikahkan oleh {data['yang_menikahkan']}, dengan maskawin berupa {data['mahar']} yang dibayar tunai, dan dihadiri oleh dua orang saksi masing-masing bernama {data['saksi1']} dan {data['saksi2']};
-2. Bahwa saat menikah Pemohon I berstatus {status_p1_full} dan Pemohon II berstatus {status_p2_full};
-3. Bahwa antara Pemohon I dan Pemohon II tidak ada hubungan keluarga, baik sedarah maupun sesusuan serta Pemohon II juga tidak dalam pinangan laki-laki lain;
-4. Bahwa, pernikahan Pemohon I dengan Pemohon II telah dilaksanakan menurut hukum Islam serta tidak ada masyarakat yang menggugat atau yang meragukan keabsahan atau keberatan atas pernikahan Pemohon I dengan Pemohon II tersebut;
-5. Bahwa dari pernikahan tersebut, Pemohon I dan Pemohon II {anak_str.strip()};
-6. Bahwa antara Pemohon I dengan Pemohon II belum pernah terjadi perceraian;
-7. Bahwa, sampai sekarang Pemohon I dengan Pemohon II belum memiliki buku nikah, karena pernikahan Pemohon I dengan Pemohon II tidak terdaftar di Kantor Urusan Agama setempat;
-8. {data['alasan_tidak_mencatatkan']}
-9. Bahwa, Pemohon I tidak mempunyai isteri yang lain, selain pemohon II;
-10. Bahwa, sekarang Pemohon I dan Pemohon II sangat membutuhkan bukti pernikahan tersebut, untuk mengurus {data['alasan_mohon']};
-11. Bahwa Pemohon I dan Pemohon II bersedia menanggung segala biaya yang ditimbulkan dari pengajuan perkara ini;
+1. \tBahwa Pemohon I dan Pemohon II telah menikah menurut agama Islam pada tanggal {format_indo_date(data['tgl_nikah'])} di {data['tempat_nikah']} dengan wali nikah adalah {wali_str} bernama {data['nama_wali']}, yang dinikahkan oleh {data['yang_menikahkan']}, dengan maskawin berupa {data['mahar']} yang dibayar tunai, dan dihadiri oleh dua orang saksi masing-masing bernama {data['saksi1']} dan {data['saksi2']};
+2. \tBahwa saat menikah Pemohon I berstatus {status_p1_full} dan Pemohon II berstatus {status_p2_full};
+3. \tBahwa antara Pemohon I dan Pemohon II tidak ada hubungan keluarga, baik sedarah maupun sesusuan serta Pemohon II juga tidak dalam pinangan laki-laki lain;
+4. \tBahwa, pernikahan Pemohon I dengan Pemohon II telah dilaksanakan menurut hukum Islam serta tidak ada masyarakat yang menggugat atau yang meragukan keabsahan atau keberatan atas pernikahan Pemohon I dengan Pemohon II tersebut;
+5. \tBahwa dari pernikahan tersebut, Pemohon I dan Pemohon II {anak_str};
+6. \tBahwa antara Pemohon I dengan Pemohon II belum pernah terjadi perceraian;
+7. \tBahwa, sampai sekarang Pemohon I dengan Pemohon II belum memiliki buku nikah, karena pernikahan Pemohon I dengan Pemohon II tidak terdaftar di Kantor Urusan Agama setempat;
+8. \t{data['alasan_tidak_mencatatkan']}
+9. \tBahwa, Pemohon I tidak mempunyai isteri yang lain, selain pemohon II;
+10. \tBahwa, sekarang Pemohon I dan Pemohon II sangat membutuhkan bukti pernikahan tersebut, untuk mengurus {data['alasan_mohon']};
+11. \tBahwa Pemohon I dan Pemohon II bersedia menanggung segala biaya yang ditimbulkan dari pengajuan perkara ini;
 
 Bahwa berdasarkan alasan-alasan tersebut di atas para Pemohon mohon kepada Ketua Pengadilan Agama Purwokerto cq. Majelis hakim yang memeriksa perkara ini berkenan menetapkan sebagai berikut :
 
 Primer :
-1. Mengabulkan permohonan para Pemohon;
-2. Menyatakan sah perkawinan antara Pemohon I, {p1['nama']} dengan Pemohon II, {p2['nama']} yang dilaksanakan pada tanggal {format_indo_date(data['tgl_nikah'])} di {data['tempat_nikah']};
-3. Menetapkan biaya perkara menurut ketentuan hukum dan perundang-undangan yang berlaku;
+1. \tMengabulkan permohonan para Pemohon;
+2. \tMenyatakan sah perkawinan antara Pemohon I {p1['nama']} dengan Pemohon II, {p2['nama']} yang dilaksanakan pada tanggal {format_indo_date(data['tgl_nikah'])} di {data['tempat_nikah']};
+3. \tMenetapkan biaya perkara menurut ketentuan hukum dan perundang-undangan yang berlaku;
 
 Subsider :
--  Atau bilamana majelis hakim yang memeriksa perkara ini berpendapat lain, mohon penetapan yang seadil-adilnya;
+- \tAtau bilamana majelis hakim yang memeriksa perkara ini berpendapat lain, mohon penetapan yang seadil-adilnya;
 
 Demikian permohonan para Pemohon, dan atas terkabulnya para Pemohon ucapkan terima kasih.
 Wassalam
 
-           Pemohon I,                                               Pemohon II,
-
-
-
-         ( {p1['nama']} )                                         ( {p2['nama']} )
+                                                                                     
+           Pemohon I,                                               Pemohon II,      
+                                                                                     
+                                                                                     
+                                                                                     
+         ( {p1['nama']} )                                         ( {p2['nama']} )   
 """
     return text
 
 def generate_docx(data):
-    """Generate Word Document (.docx) with exact formatting."""
-    if not DOCX_AVAILABLE:
-        return None
-
+    if not DOCX_AVAILABLE: return None
     doc = docx.Document()
     
     # Page setup (Atas 3cm, Kiri 4cm, Kanan 2cm, Bawah 3cm)
@@ -211,15 +312,14 @@ def generate_docx(data):
     p2 = data['p2']
     tgl_surat_str = format_indo_date(data['tgl_permohonan'])
 
-    # Header Date
     p_header = doc.add_paragraph()
-    p_header.add_run(f"Hal : Permohonan Pengesahan Nikah\t\t\tPurwokerto, {tgl_surat_str}")
+    p_header.add_run(f"Hal : Permohonan Isbat Nikah\t\t\tPurwokerto, {tgl_surat_str}")
 
     doc.add_paragraph("\tKepada\nYth. Ketua Pengadilan Agama Purwokerto\ndi\nPurwokerto.\n")
     doc.add_paragraph("Assalamu Alaikum Wr. Wb.")
     doc.add_paragraph("Dengan hormat,\nYang bertanda tangan di bawah ini :")
 
-    # Format Biodata dengan tabel transparan (menjaga tabulasi rapi)
+    # Format Biodata dengan tabel
     table_bio = doc.add_table(rows=0, cols=3)
     def add_bio_row(label, value):
         row_cells = table_bio.add_row().cells
@@ -238,10 +338,7 @@ def generate_docx(data):
     add_bio_row("Nomor telepon", p1['telepon'])
     add_bio_row("Email", p1['email'])
     add_bio_row("Alamat", f"{p1['alamat']}, selanjutnya disebut sebagai Pemohon I;")
-    
-    # Spacer
     table_bio.add_row()
-    
     add_bio_row("Nama", p2['nama'])
     add_bio_row("NIK", p2['nik'])
     add_bio_row("Tempat Tgl Lahir", f"{p2['tempat_lahir']}, {format_indo_date(p2['tgl_lahir'])} (umur {p2['umur']} tahun)")
@@ -254,7 +351,6 @@ def generate_docx(data):
 
     doc.add_paragraph("\nDengan ini mengajukan pemohonan pengesahan nikah, dengan alasan sebagai berikut:")
 
-    # Menyusun Posita
     wali_str = data['hubungan_wali']
     if data['hubungan_wali'] != 'Ayah Kandung' and data['alasan_wali']:
         wali_str += f" {data['alasan_wali']}"
@@ -284,14 +380,11 @@ def generate_docx(data):
         f"Bahwa Pemohon I dan Pemohon II bersedia menanggung segala biaya yang ditimbulkan dari pengajuan perkara ini;"
     ]
 
-    # Format Hanging Indent dan Justify untuk Posita
     for idx, text in enumerate(posita_list, 1):
         p = doc.add_paragraph()
         p.alignment = WD_ALIGN_PARAGRAPH.JUSTIFY
         p.paragraph_format.left_indent = Cm(0.7)
         p.paragraph_format.first_line_indent = Cm(-0.7)
-        
-        # Pisahkan newline jika ada data anak
         lines = text.split('\n')
         p.add_run(f"{idx}. {lines[0]}")
         if len(lines) > 1:
@@ -304,13 +397,11 @@ def generate_docx(data):
     doc.add_paragraph("\nBahwa berdasarkan alasan-alasan tersebut di atas para Pemohon mohon kepada Ketua Pengadilan Agama Purwokerto cq. Majelis hakim yang memeriksa perkara ini berkenan menetapkan sebagai berikut :")
     
     doc.add_paragraph("Primer :")
-    
     petitum_primer = [
         "Mengabulkan permohonan para Pemohon;",
-        f"Menyatakan sah perkawinan antara Pemohon I, {p1['nama']} dengan Pemohon II, {p2['nama']} yang dilaksanakan pada tanggal {format_indo_date(data['tgl_nikah'])} di {data['tempat_nikah']};",
+        f"Menyatakan sah perkawinan antara Pemohon I {p1['nama']} dengan Pemohon II, {p2['nama']} yang dilaksanakan pada tanggal {format_indo_date(data['tgl_nikah'])} di {data['tempat_nikah']};",
         "Menetapkan biaya perkara menurut ketentuan hukum dan perundang-undangan yang berlaku;"
     ]
-    
     for idx, text in enumerate(petitum_primer, 1):
         p = doc.add_paragraph()
         p.alignment = WD_ALIGN_PARAGRAPH.JUSTIFY
@@ -327,7 +418,6 @@ def generate_docx(data):
 
     doc.add_paragraph("\nDemikian permohonan para Pemohon, dan atas terkabulnya para Pemohon ucapkan terima kasih.\nWassalam\n")
 
-    # Format Tanda Tangan Center Text dengan Tabel Transparan
     table = doc.add_table(rows=1, cols=2)
     table.autofit = True
     
@@ -335,35 +425,38 @@ def generate_docx(data):
     p_p1 = cell_p1.paragraphs[0]
     p_p1.alignment = WD_ALIGN_PARAGRAPH.CENTER
     p_p1.add_run("Pemohon I,\n\n\n\n")
-    p_p1.add_run(f"( {p1['nama']} )").bold = True
+    p_p1.add_run(f"( {p1['nama']} )")
     
     cell_p2 = table.cell(0, 1)
     p_p2 = cell_p2.paragraphs[0]
     p_p2.alignment = WD_ALIGN_PARAGRAPH.CENTER
     p_p2.add_run("Pemohon II,\n\n\n\n")
-    p_p2.add_run(f"( {p2['nama']} )").bold = True
+    p_p2.add_run(f"( {p2['nama']} )")
 
     buffer = BytesIO()
     doc.save(buffer)
     buffer.seek(0)
     return buffer
 
-st.title("📄 Generator Surat Permohonan Isbat Nikah")
-st.caption("Aplikasi Pembuat Surat Permohonan Isbat Nikah Otomatis (Streamlit Version)")
+# Banner Kustom untuk Header Aplikasi
+st.markdown("""
+    <div class="header-banner">
+        <h1 class="header-title">⚖️ Generator Surat Isbat Nikah</h1>
+        <p class="header-subtitle">Aplikasi Resmi Pembuat Format Permohonan Isbat Nikah</p>
+    </div>
+""", unsafe_allow_html=True)
 
 if not DOCX_AVAILABLE:
-    st.warning("⚠️ Module `python-docx` tidak terdeteksi. Fitur unduh dokumen akan dialihkan ke format Teks (.txt). Jalankan `pip install python-docx` untuk mengaktifkan ekspor Word.")
+    st.warning("⚠️ Module `python-docx` tidak terdeteksi. Jalankan `pip install python-docx` untuk mengaktifkan ekspor Word.")
 
 col_form, col_preview = st.columns([7, 5])
 
 with col_form:
-    st.header("Formulir Permohonan")
+    st.header("📝 Formulir Permohonan")
     
-    # 1. Informasi Permohonan
     with st.expander("1. Informasi Permohonan", expanded=True):
         tgl_permohonan = st.date_input("Tanggal Surat Permohonan", value=datetime.date.today())
 
-    # 2. Data Pemohon I (Suami)
     with st.expander("2. Data Pemohon I (Suami)", expanded=True):
         c1, c2 = st.columns(2)
         nama_p1 = c1.text_input("Nama Lengkap Pemohon I", value="Ahmad Bin Fulan")
@@ -374,12 +467,9 @@ with col_form:
         tgl_lahir_p1 = c4.date_input("Tanggal Lahir (Pemohon I)", value=datetime.date(1990, 1, 1), min_value=datetime.date(1900, 1, 1), max_value=datetime.date.today())
         
         umur_p1 = calculate_age(tgl_lahir_p1, tgl_permohonan)
-        st.info(f"💡 **Umur Pemohon I:** {umur_p1} tahun")
+        st.info(f"💡 Umur Pemohon I saat ini: **{umur_p1} tahun**")
 
-        pilihan_job_p1 = st.selectbox(
-            "Pekerjaan Pemohon I", 
-            ["Pegawai BUMN/BUMD", "ASN", "Anggota Polri", "Anggota TNI", "Wiraswasta", "Buruh Harian Lepas", "Petani/Pekebun", "Lain-lain"]
-        )
+        pilihan_job_p1 = st.selectbox("Pekerjaan Pemohon I", ["Pegawai BUMN/BUMD", "ASN", "Anggota Polri", "Anggota TNI", "Wiraswasta", "Buruh Harian Lepas", "Petani/Pekebun", "Lain-lain"])
         pekerjaan_p1 = pilihan_job_p1 if pilihan_job_p1 != "Lain-lain" else st.text_input("Sebutkan Pekerjaan Pemohon I", value="")
 
         pendidikan_p1 = st.selectbox("Pendidikan Pemohon I", ["Tidak Sekolah", "TK", "SD", "SLTP", "SLTA", "D1", "D2", "D3", "D4", "S1", "S2", "S3"], index=4)
@@ -399,10 +489,8 @@ with col_form:
         c5, c6 = st.columns(2)
         telepon_p1 = c5.text_input("No. Telepon/HP Pemohon I", value="08123456789")
         email_p1 = c6.text_input("Email Pemohon I", value="ahmad@email.com")
-        
         alamat_p1 = st.text_area("Alamat Lengkap Pemohon I", value="RT 01 RW 02, Desa Purwokerto, Kec. Purwokerto Barat, Kab. Banyumas")
 
-    # 3. Data Pemohon II (Istri)
     with st.expander("3. Data Pemohon II (Istri)", expanded=True):
         c1, c2 = st.columns(2)
         nama_p2 = c1.text_input("Nama Lengkap Pemohon II", value="Siti Bintan")
@@ -413,12 +501,9 @@ with col_form:
         tgl_lahir_p2 = c4.date_input("Tanggal Lahir (Pemohon II)", value=datetime.date(1995, 1, 1), min_value=datetime.date(1900, 1, 1), max_value=datetime.date.today())
         
         umur_p2 = calculate_age(tgl_lahir_p2, tgl_permohonan)
-        st.info(f"💡 **Umur Pemohon II:** {umur_p2} tahun")
+        st.info(f"💡 Umur Pemohon II saat ini: **{umur_p2} tahun**")
 
-        pilihan_job_p2 = st.selectbox(
-            "Pekerjaan Pemohon II", 
-            ["Mengurus Rumah Tangga", "Pegawai BUMN/BUMD", "ASN", "Wiraswasta", "Buruh Harian Lepas", "Lain-lain"]
-        )
+        pilihan_job_p2 = st.selectbox("Pekerjaan Pemohon II", ["Mengurus Rumah Tangga", "Pegawai BUMN/BUMD", "ASN", "Wiraswasta", "Buruh Harian Lepas", "Lain-lain"])
         pekerjaan_p2 = pilihan_job_p2 if pilihan_job_p2 != "Lain-lain" else st.text_input("Sebutkan Pekerjaan Pemohon II", value="")
 
         pendidikan_p2 = st.selectbox("Pendidikan Pemohon II", ["Tidak Sekolah", "TK", "SD", "SLTP", "SLTA", "D1", "D2", "D3", "D4", "S1", "S2", "S3"], index=4)
@@ -438,10 +523,8 @@ with col_form:
         c5, c6 = st.columns(2)
         telepon_p2 = c5.text_input("No. Telepon/HP Pemohon II", value="08987654321")
         email_p2 = c6.text_input("Email Pemohon II", value="siti@email.com")
-        
         alamat_p2 = st.text_area("Alamat Lengkap Pemohon II", value="RT 01 RW 02, Desa Purwokerto, Kec. Purwokerto Barat, Kab. Banyumas")
 
-    # 4. Detail Pernikahan Sirri
     with st.expander("4. Detail Pernikahan Sirri", expanded=True):
         c1, c2 = st.columns(2)
         tgl_nikah = c1.date_input("Tanggal Nikah Sirri", value=datetime.date(2015, 1, 10), min_value=datetime.date(1900, 1, 1), max_value=datetime.date.today())
@@ -460,7 +543,6 @@ with col_form:
         saksi1 = c3.text_input("Saksi Nikah I", value="Saksi 1")
         saksi2 = c4.text_input("Saksi Nikah II", value="Saksi 2")
 
-    # 5. Alasan & Tujuan
     with st.expander("5. Alasan & Tujuan Permohonan", expanded=True):
         status_anak = st.selectbox("Keterangan Dikaruniai Anak", ["belum", "sudah"], index=1, format_func=lambda x: "Telah dikaruniai anak" if x == "sudah" else "Belum / Tidak dikaruniai anak")
         
@@ -474,7 +556,6 @@ with col_form:
                 c_tempat = c2.text_input(f"Tempat Lahir #{i+1}", value="Purwokerto", key=f"c_tempat_{i}")
                 c_tgl = c3.date_input(f"Tanggal Lahir #{i+1}", value=datetime.date(2020, 1, 1), min_value=datetime.date(1900, 1, 1), max_value=datetime.date.today(), key=f"c_tgl_{i}")
                 c_umur = calculate_age(c_tgl, tgl_permohonan)
-                
                 anak_list.append({"nama": c_nama, "tempat": c_tempat, "tgl_lahir": c_tgl, "umur": c_umur})
 
         alasan_tidak_mencatatkan = st.selectbox(
@@ -486,11 +567,7 @@ with col_form:
             ], index=2
         )
 
-        pil_alasan_mohon = st.selectbox(
-            "Maksud Permohonan",
-            ["penerbitan akta nikah Para Pemohon serta keperluan lainnya", "mengurus akta kelahiran anak Para Pemohon serta keperluan lainnya", "keperluan tersendiri"],
-            index=1
-        )
+        pil_alasan_mohon = st.selectbox("Maksud Permohonan", ["penerbitan akta nikah Para Pemohon serta keperluan lainnya", "mengurus akta kelahiran anak Para Pemohon serta keperluan lainnya", "keperluan tersendiri"], index=1)
         alasan_mohon = pil_alasan_mohon if pil_alasan_mohon != "keperluan tersendiri" else st.text_input("Sebutkan Keperluan Anda", value="pendaftaran haji")
 
 form_data = {
@@ -502,9 +579,8 @@ form_data = {
 }
 
 with col_preview:
-    st.header("Pratinjau Dokumen Real-time")
+    st.header("📄 Pratinjau Dokumen")
     
-    # Tombol Simpan ke Database
     if st.button("💾 Simpan Data ke Database", type="primary", use_container_width=True):
         if save_to_db(form_data):
             st.success(f"Berhasil menyimpan data atas nama {nama_p1} & {nama_p2} ke database!")
@@ -512,35 +588,36 @@ with col_preview:
             st.error("Gagal menyimpan data ke database.")
             
     st.write("---")
-
     letter_text = build_letter_text(form_data)
-    st.text_area("Hasil Draf Surat Permohonan", value=letter_text, height=620)
+    st.text_area("Hasil Draf Surat Permohonan", value=letter_text, height=580)
 
-    st.subheader("Unduh Dokumen Hasil Generator")
+    st.subheader("📥 Unduh Dokumen")
     if DOCX_AVAILABLE:
         docx_file = generate_docx(form_data)
         st.download_button(
-            label="📥 Unduh Dokumen Word (.docx)",
+            label="Unduh Dokumen Word (.docx)",
             data=docx_file,
             file_name=f"Permohonan_Isbat_Nikah_{nama_p1.replace(' ', '_')}.docx",
             mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-            use_container_width=True
+            use_container_width=True,
+            type="secondary"
         )
     
     st.download_button(
-        label="📄 Unduh Teks Draf (.txt)",
+        label="Unduh Teks Draf (.txt)",
         data=letter_text,
         file_name=f"Permohonan_Isbat_Nikah_{nama_p1.replace(' ', '_')}.txt",
         mime="text/plain",
-        use_container_width=True
+        use_container_width=True,
+        type="secondary"
     )
 
 st.write("---")
+
 st.header("🗄️ Panel Admin & Database")
 
 password_input = st.text_input("Masukkan Kata Sandi Admin untuk melihat database:", type="password")
 
-# Ganti "rahasia123" dengan password pilihan Anda
 if password_input == "rahasia123":
     st.success("Akses Diberikan!")
     
@@ -583,25 +660,25 @@ if password_input == "rahasia123":
                 data=csv,
                 file_name=f"Rekap_Data_Isbat_Nikah_{datetime.datetime.now().strftime('%Y%m%d')}.csv",
                 mime="text/csv",
-                use_container_width=True
+                use_container_width=True,
+                type="primary"
             )
         else:
             st.info("Belum ada data tersimpan.")
             
     st.write("---")
     st.subheader("📧 Backup Database ke Email")
-    st.write("Kirim file `isbat_nikah.db` langsung ke email Anda.")
+    st.write("Kirim file `isbat_nikah.db` langsung ke email Anda secara aman.")
     
     with st.form("form_email_backup"):
-        # MENGAMBIL DATA DARI STREAMLIT SECRETS
         default_email = st.secrets.get("email_saya", "")
         default_sandi = st.secrets.get("sandi_aplikasi", "")
         
-        email_pengirim = st.text_input("Email Pengirim", value=default_email, help="Sistem membaca otomatis jika Streamlit Secrets diatur")
+        email_pengirim = st.text_input("Email Pengirim (Anda)", value=default_email, help="Otomatis terisi dari Secrets jika ada")
         password_app = st.text_input("Sandi Aplikasi Gmail", value=default_sandi, type="password")
-        email_penerima = st.text_input("Email Penerima", value=default_email)
+        email_penerima = st.text_input("Email Penerima (Tujuan)", value=default_email)
         
-        btn_kirim = st.form_submit_button("Kirim File Database (.db) ke Email")
+        btn_kirim = st.form_submit_button("Kirim File Database (.db) ke Email", type="primary")
         
         if btn_kirim:
             if not email_pengirim or not password_app or not email_penerima:
@@ -612,7 +689,7 @@ if password_input == "rahasia123":
                     msg['From'] = email_pengirim
                     msg['To'] = email_penerima
                     msg['Subject'] = f"🔒 Backup Database Isbat Nikah - {datetime.datetime.now().strftime('%d %b %Y')}"
-                    msg.attach(MIMEText("Terlampir file backup database (isbat_nikah.db).", 'plain'))
+                    msg.attach(MIMEText("Terlampir file backup database (isbat_nikah.db) dari Aplikasi Isbat Nikah.", 'plain'))
                     
                     filename = "isbat_nikah.db"
                     if os.path.exists(filename):
@@ -630,8 +707,8 @@ if password_input == "rahasia123":
                         server.quit()
                         st.success(f"✅ Mantap! File database berhasil dikirim ke {email_penerima}.")
                     else:
-                        st.error("Gagal: File database belum terbentuk.")
+                        st.error("Gagal: File database belum terbentuk (belum ada yang menekan tombol Simpan).")
                 except Exception as e:
-                    st.error(f"Gagal mengirim email. Periksa kembali email dan sandi aplikasi Anda. Error: {e}")
+                    st.error(f"Gagal mengirim email. Pastikan sandi aplikasi Anda benar. Error detail: {e}")
 elif password_input:
-    st.error("Kata sandi salah!")
+    st.error("❌ Kata sandi salah!")
