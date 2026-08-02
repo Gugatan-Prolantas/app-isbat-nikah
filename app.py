@@ -95,17 +95,17 @@ Alamat\t\t\t: {p2['alamat']}, selanjutnya disebut sebagai Pemohon II;
 
 Dengan ini mengajukan pemohonan pengesahan nikah, dengan alasan sebagai berikut:
 
-Bahwa Pemohon I dan Pemohon II telah menikah menurut agama Islam pada tanggal {format_indo_date(data['tgl_nikah'])} di {data['tempat_nikah']} dengan wali nikah adalah {wali_str}, yang dinikahkan oleh {data['yang_menikahkan']}, dengan maskawin berupa {data['mahar']} yang dibayar tunai, dan dihadiri oleh dua orang saksi masing-masing bernama {data['saksi1']} dan {data['saksi2']};
-Bahwa saat menikah Pemohon I berstatus {stat_p1} dan Pemohon II berstatus {stat_p2};
-Bahwa antara Pemohon I dan Pemohon II tidak ada hubungan keluarga, baik sedarah maupun sesusuan serta Pemohon II juga tidak dalam pinangan laki-laki lain;
-Bahwa, pernikahan Pemohon I dengan Pemohon II telah dilaksanakan menurut hukum Islam serta tidak ada masyarakat yang menggugat atau yang meragukan keabsahan atau keberatan atas pernikahan Pemohon I dengan Pemohon II tersebut;
-Bahwa dari pernikahan tersebut, Pemohon I dan Pemohon II {anak_str}
-Bahwa antara Pemohon I dengan Pemohon II belum pernah terjadi perceraian;
-Bahwa, sampai sekarang Pemohon I dengan Pemohon II belum memiliki buku nikah, karena pernikahan Pemohon I dengan Pemohon II tidak terdaftar di Kantor Urusan Agama setempat;
-{data['alasan_tidak_mencatatkan']}
-Bahwa, Pemohon I tidak mempunyai isteri yang lain, selain pemohon II;
-Bahwa, sekarang Pemohon I dan Pemohon II sangat membutuhkan bukti pernikahan tersebut, untuk mengurus {data['alasan_mohon']};
-Bahwa Pemohon I dan Pemohon II bersedia menanggung segala biaya yang ditimbulkan dari pengajuan perkara ini;
+1.\tBahwa Pemohon I dan Pemohon II telah menikah menurut agama Islam pada tanggal {format_indo_date(data['tgl_nikah'])} di {data['tempat_nikah']} dengan wali nikah adalah {wali_str}, yang dinikahkan oleh {data['yang_menikahkan']}, dengan maskawin berupa {data['mahar']} yang dibayar tunai, dan dihadiri oleh dua orang saksi masing-masing bernama {data['saksi1']} dan {data['saksi2']};
+2.\tBahwa saat menikah Pemohon I berstatus {stat_p1} dan Pemohon II berstatus {stat_p2};
+3.\tBahwa antara Pemohon I dan Pemohon II tidak ada hubungan keluarga, baik sedarah maupun sesusuan serta Pemohon II juga tidak dalam pinangan laki-laki lain;
+4.\tBahwa, pernikahan Pemohon I dengan Pemohon II telah dilaksanakan menurut hukum Islam serta tidak ada masyarakat yang menggugat atau yang meragukan keabsahan atau keberatan atas pernikahan Pemohon I dengan Pemohon II tersebut;
+5.\tBahwa dari pernikahan tersebut, Pemohon I dan Pemohon II {anak_str}
+6.\tBahwa antara Pemohon I dengan Pemohon II belum pernah terjadi perceraian;
+7.\tBahwa, sampai sekarang Pemohon I dengan Pemohon II belum memiliki buku nikah, karena pernikahan Pemohon I dengan Pemohon II tidak terdaftar di Kantor Urusan Agama setempat;
+8.\t{data['alasan_tidak_mencatatkan']}
+9.\tBahwa, Pemohon I tidak mempunyai isteri yang lain, selain pemohon II;
+10.\tBahwa, sekarang Pemohon I dan Pemohon II sangat membutuhkan bukti pernikahan tersebut, untuk mengurus {data['alasan_mohon']};
+11.\tBahwa Pemohon I dan Pemohon II bersedia menanggung segala biaya yang ditimbulkan dari pengajuan perkara ini;
 
 Bahwa berdasarkan alasan-alasan tersebut di atas para Pemohon mohon kepada Ketua Pengadilan Agama Purwokerto cq. Majelis hakim yang memeriksa perkara ini berkenan menetapkan sebagai berikut :
 
@@ -195,19 +195,34 @@ def generate_docx(data):
             anak_lines.append(f"    {idx}. {child['nama']}, tempat/tgl lahir: {c_ttl} (umur {child['umur']} tahun)")
         anak_str = "\n".join(anak_lines) + ";"
 
-    doc.add_paragraph(f"Bahwa Pemohon I dan Pemohon II telah menikah menurut agama Islam pada tanggal {format_indo_date(data['tgl_nikah'])} di {data['tempat_nikah']} dengan wali nikah adalah {wali_str}, yang dinikahkan oleh {data['yang_menikahkan']}, dengan maskawin berupa {data['mahar']} yang dibayar tunai, dan dihadiri oleh dua orang saksi masing-masing bernama {data['saksi1']} dan {data['saksi2']};")
-    doc.add_paragraph(f"Bahwa saat menikah Pemohon I berstatus {stat_p1} dan Pemohon II berstatus {stat_p2};")
-    doc.add_paragraph("Bahwa antara Pemohon I dan Pemohon II tidak ada hubungan keluarga, baik sedarah maupun sesusuan serta Pemohon II juga tidak dalam pinangan laki-laki lain;")
-    doc.add_paragraph("Bahwa, pernikahan Pemohon I dengan Pemohon II telah dilaksanakan menurut hukum Islam serta tidak ada masyarakat yang menggugat atau yang meragukan keabsahan atau keberatan atas pernikahan Pemohon I dengan Pemohon II tersebut;")
-    doc.add_paragraph(f"Bahwa dari pernikahan tersebut, Pemohon I dan Pemohon II {anak_str}")
-    doc.add_paragraph("Bahwa antara Pemohon I dengan Pemohon II belum pernah terjadi perceraian;")
-    doc.add_paragraph("Bahwa, sampai sekarang Pemohon I dengan Pemohon II belum memiliki buku nikah, karena pernikahan Pemohon I dengan Pemohon II tidak terdaftar di Kantor Urusan Agama setempat;")
-    doc.add_paragraph(data['alasan_tidak_mencatatkan'])
-    doc.add_paragraph("Bahwa, Pemohon I tidak mempunyai isteri yang lain, selain pemohon II;")
-    doc.add_paragraph(f"Bahwa, sekarang Pemohon I dan Pemohon II sangat membutuhkan bukti pernikahan tersebut, untuk mengurus {data['alasan_mohon']};")
-    doc.add_paragraph("Bahwa Pemohon I dan Pemohon II bersedia menanggung segala biaya yang ditimbulkan dari pengajuan perkara ini;")
+    # Setup Posita points
+    posita_points = [
+        f"Bahwa Pemohon I dan Pemohon II telah menikah menurut agama Islam pada tanggal {format_indo_date(data['tgl_nikah'])} di {data['tempat_nikah']} dengan wali nikah adalah {wali_str}, yang dinikahkan oleh {data['yang_menikahkan']}, dengan maskawin berupa {data['mahar']} yang dibayar tunai, dan dihadiri oleh dua orang saksi masing-masing bernama {data['saksi1']} dan {data['saksi2']};",
+        f"Bahwa saat menikah Pemohon I berstatus {stat_p1} dan Pemohon II berstatus {stat_p2};",
+        "Bahwa antara Pemohon I dan Pemohon II tidak ada hubungan keluarga, baik sedarah maupun sesusuan serta Pemohon II juga tidak dalam pinangan laki-laki lain;",
+        "Bahwa, pernikahan Pemohon I dengan Pemohon II telah dilaksanakan menurut hukum Islam serta tidak ada masyarakat yang menggugat atau yang meragukan keabsahan atau keberatan atas pernikahan Pemohon I dengan Pemohon II tersebut;",
+        f"Bahwa dari pernikahan tersebut, Pemohon I dan Pemohon II {anak_str}",
+        "Bahwa antara Pemohon I dengan Pemohon II belum pernah terjadi perceraian;",
+        "Bahwa, sampai sekarang Pemohon I dengan Pemohon II belum memiliki buku nikah, karena pernikahan Pemohon I dengan Pemohon II tidak terdaftar di Kantor Urusan Agama setempat;",
+        data['alasan_tidak_mencatatkan'],
+        "Bahwa, Pemohon I tidak mempunyai isteri yang lain, selain pemohon II;",
+        f"Bahwa, sekarang Pemohon I dan Pemohon II sangat membutuhkan bukti pernikahan tersebut, untuk mengurus {data['alasan_mohon']};",
+        "Bahwa Pemohon I dan Pemohon II bersedia menanggung segala biaya yang ditimbulkan dari pengajuan perkara ini;"
+    ]
 
-    doc.add_paragraph("Bahwa berdasarkan alasan-alasan tersebut di atas para Pemohon mohon kepada Ketua Pengadilan Agama Purwokerto cq. Majelis hakim yang memeriksa perkara ini berkenan menetapkan sebagai berikut :")
+    # Add Posita with Numbering and Justified Alignment
+    for i, point_text in enumerate(posita_points, 1):
+        p = doc.add_paragraph()
+        p.alignment = WD_ALIGN_PARAGRAPH.JUSTIFY
+        # Hanging indent logic (0.3 inches indentation for the text, negative for the number)
+        p.paragraph_format.left_indent = Inches(0.3)
+        p.paragraph_format.first_line_indent = Inches(-0.3)
+        p.add_run(f"{i}.\t{point_text}")
+
+    # Add Petitum
+    p_petitum_intro = doc.add_paragraph()
+    p_petitum_intro.alignment = WD_ALIGN_PARAGRAPH.JUSTIFY
+    p_petitum_intro.add_run("Bahwa berdasarkan alasan-alasan tersebut di atas para Pemohon mohon kepada Ketua Pengadilan Agama Purwokerto cq. Majelis hakim yang memeriksa perkara ini berkenan menetapkan sebagai berikut :")
     
     p_petitum = doc.add_paragraph()
     p_petitum.add_run("Primer :\n")
