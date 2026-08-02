@@ -3,6 +3,12 @@ import datetime
 from io import BytesIO
 import sqlite3
 import json
+import os
+import smtplib
+from email.mime.multipart import MIMEMultipart
+from email.mime.base import MIMEBase
+from email.mime.text import MIMEText
+from email import encoders
 
 # Try importing python-docx for Word file generation
 try:
@@ -654,21 +660,134 @@ else:
     if st.button("🔒 Tutup & Kunci Database"):
         st.session_state.admin_logged_in = False
         st.rerun()
+    # ... existing code ...
+        with st.expander("Klik untuk melihat histori data yang telah dimasukkan ke database", expanded=True):
+            db_data = load_data_db()
+            if db_data:
+                # Membongkar data mentah SQLite dan JSON menjadi kolom-kolom lengkap
+                df_data = []
+                for row in db_data:
+                    base_dict = {
+                        "ID": row[0],
+                        "Waktu Input": row[1]
+                    }
+                    
+                    # Cek apakah ada kolom data_json (indeks ke-6)
+                    if len(row) > 6 and row[6]:
+                        try:
+                            full_data = json.loads(row[6])
+                            p1 = full_data.get("p1", {})
+                            p2 = full_data.get("p2", {})
+                            
+                            # Ekstrak semua data yang ada di JSON
+                            base_dict.update({
+                                "P1 - Nama": p1.get("nama", row[2]),
+                                "P1 - NIK": p1.get("nik", row[3]),
+                                "P1 - TTL": f"{p1.get('tempat_lahir', '')}, {p1.get('tgl_lahir', '')}",
+                                "P1 - Agama": p1.get("agama", "Islam"),
+                                "P1 - Pekerjaan": p1.get("pekerjaan", ""),
+                                "P1 - Pendidikan": p1.get("pendidikan", ""),
+                                "P1 - Status": p1.get("status", ""),
+                                "P1 - Telepon": p1.get("telepon", ""),
+                                "P1 - Email": p1.get("email", ""),
+                                "P1 - Alamat": p1.get("alamat", ""),
+                                
+                                "P2 - Nama": p2.get("nama", row[4]),
+                                "P2 - NIK": p2.get("nik", row[5]),
+                                "P2 - TTL": f"{p2.get('tempat_lahir', '')}, {p2.get('tgl_lahir', '')}",
+                                "P2 - Agama": p2.get("agama", "Islam"),
+                                "P2 - Pekerjaan": p2.get("pekerjaan", ""),
+                                "P2 - Pendidikan": p2.get("pendidikan", ""),
+                                "P2 - Status": p2.get("status", ""),
+                                "P2 - Telepon": p2.get("telepon", ""),
+                                "P2 - Email": p2.get("email", ""),
+                                "P2 - Alamat": p2.get("alamat", ""),
+                                
+                                "Tgl Nikah Sirri": full_data.get("tgl_nikah", ""),
+                                "Tempat Nikah": full_data.get("tempat_nikah", ""),
+                                "Wali Nikah": full_data.get("nama_wali", ""),
+                                "Yg Menikahkan": full_data.get("yang_menikahkan", ""),
+                                "Mahar": full_data.get("mahar", ""),
+                                "Saksi 1": full_data.get("saksi1", ""),
+                                "Saksi 2": full_data.get("saksi2", ""),
+                                "Status Anak": full_data.get("status_anak", ""),
+                                "Alasan Mohon": full_data.get("alasan_mohon", "")
+                            })
+                        except:
+                            # Jika JSON gagal dimuat, tampilkan data dasar
+                            base_dict.update({"P1 - Nama": row[2], "P1 - NIK": row[3], "P2 - Nama": row[4], "P2 - NIK": row[5]})
+                    else:
+                        base_dict.update({"P1 - Nama": row[2], "P1 - NIK": row[3], "P2 - Nama": row[4], "P2 - NIK": row[5]})
+                        
+                    df_data.append(base_dict)
+                    
+                st.dataframe(df_data, use_container_width=True)
+                
+                # Fitur Ekspor ke CSV / Excel
+                import pandas as pd
+                df_export = pd.DataFrame(df_data)
+                csv = df_export.to_csv(index=False).encode('utf-8')
+                
+                st.download_button(
+                    label="📊 Unduh Seluruh Data ke Excel (CSV)",
+                    data=csv,
+                    file_name=f"Rekap_Data_Isbat_Nikah_{datetime.datetime.now().strftime('%Y%m%d')}.csv",
+                    mime="text/csv",
+                    use_container_width=True,
+                    help="File CSV ini bisa dibuka menggunakan Microsoft Excel."
+                )
+            else:
+                st.info("Belum ada data yang tersimpan di dalam database.")
+                
+        st.write("---")
+        st.subheader("📧 Backup Database ke Email")
+        st.write("Kirim salinan file `isbat_nikah.db` langsung ke email Anda sebagai cadangan (backup) yang aman.")
         
-    with st.expander("Klik untuk melihat histori data yang telah dimasukkan ke database", expanded=True):
-        db_data = load_data_db()
-        if db_data:
-            # Mengubah data mentah SQLite menjadi format list dictionary (mirip dataframe) agar tabel rapi
-            df_data = [
-                {
-                    "ID": row[0],
-                    "Waktu Input (UTC)": row[1],
-                    "Nama Pemohon I": row[2],
-                    "NIK Pemohon I": row[3],
-                    "Nama Pemohon II": row[4],
-                    "NIK Pemohon II": row[5]
-                } for row in db_data
-            ]
-            st.dataframe(df_data, use_container_width=True)
-        else:
-            st.info("Belum ada data yang tersimpan di dalam database.")
+        with st.form("form_email_backup"):
+            # Mengambil email dan sandi dari Streamlit Secrets (jika ada)
+            default_email = st.secrets.get("email_saya", "")
+            default_sandi = st.secrets.get("sandi_aplikasi", "")
+            
+            email_pengirim = st.text_input("Email Pengirim (Harus Gmail)", value=default_email)
+            password_app = st.text_input("Sandi Aplikasi Gmail", value=default_sandi, type="password", help="Bukan password biasa. Gunakan Sandi Aplikasi (App Password) 16 digit dari Akun Google Anda.")
+            email_penerima = st.text_input("Email Penerima (Boleh disamakan dengan email pengirim)", value=default_email)
+            
+            btn_kirim = st.form_submit_button("Kirim File Database (.db) ke Email")
+            
+            if btn_kirim:
+                if not email_pengirim or not password_app or not email_penerima:
+                    st.error("Mohon lengkapi alamat email dan sandi aplikasi!")
+                else:
+                    try:
+                        # Setup struktur Email
+                        msg = MIMEMultipart()
+                        msg['From'] = email_pengirim
+                        msg['To'] = email_penerima
+                        msg['Subject'] = f"🔒 Backup Database Isbat Nikah - {datetime.datetime.now().strftime('%d %b %Y')}"
+                        
+                        body = "Terlampir file backup database (isbat_nikah.db) dari Aplikasi Generator Surat Isbat Nikah Anda.\n\nFile ini hanya bisa dibuka oleh Anda menggunakan SQLite Viewer."
+                        msg.attach(MIMEText(body, 'plain'))
+                        
+                        # Ambil dan lampirkan file .db
+                        filename = "isbat_nikah.db"
+                        if os.path.exists(filename):
+                            with open(filename, "rb") as attachment:
+                                part = MIMEBase('application', 'octet-stream')
+                                part.set_payload(attachment.read())
+                                encoders.encode_base64(part)
+                                part.add_header('Content-Disposition', f"attachment; filename= {filename}")
+                                msg.attach(part)
+                                
+                            # Proses pengiriman melalui server SMTP Gmail
+                            server = smtplib.SMTP('smtp.gmail.com', 587)
+                            server.starttls()
+                            server.login(email_pengirim, password_app)
+                            text = msg.as_string()
+                            server.sendmail(email_pengirim, email_penerima, text)
+                            server.quit()
+                            
+                            st.success(f"✅ Mantap! File database berhasil dikirim ke {email_penerima}.")
+                        else:
+                            st.error("Gagal: File database belum terbentuk.")
+                    except Exception as e:
+                        st.error(f"Gagal mengirim email. Periksa kembali email dan sandi aplikasi Anda. Error: {e}")
