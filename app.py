@@ -81,6 +81,7 @@ Dengan hormat, kami yang bertanda tangan di bawah ini:
    Status           : {p1['status']}{status_detail_p1}
    Alamat           : {p1['alamat']}
    No. Telepon      : {p1['telepon']}
+   Email            : {p1['email']}
 
 2. NAMA             : {p2['nama']}
    NIK              : {p2['nik']}
@@ -90,6 +91,7 @@ Dengan hormat, kami yang bertanda tangan di bawah ini:
    Status           : {p2['status']}{status_detail_p2}
    Alamat           : {p2['alamat']}
    No. Telepon      : {p2['telepon']}
+   Email            : {p2['email']}
 
 Selanjutnya disebut sebagai Pemohon I dan Pemohon II.
 
@@ -158,7 +160,8 @@ def generate_docx(data):
         if applicant['detail_status_text']:
             p.add_run(f"   Keterangan: {applicant['detail_status_text']}\n")
         p.add_run(f"   Alamat: {applicant['alamat']}\n")
-        p.add_run(f"   No. Telp: {applicant['telepon']}")
+        p.add_run(f"   No. Telp: {applicant['telepon']}\n")
+        p.add_run(f"   Email: {applicant['email']}")
 
     add_applicant_data(1, p1)
     add_applicant_data(2, p2)
@@ -255,6 +258,7 @@ with col_form:
             detail_status_p1_text = f"Surat Kematian No: {no_surat_m} tgl {format_indo_date(tgl_surat_m)} (meninggal tgl {format_indo_date(tgl_mati)}) diterbitkan {penerbit_m}"
 
         telepon_p1 = st.text_input("No. Telepon/HP Pemohon I", value="08123456789")
+        email_p1 = st.text_input("Email Pemohon I", value="ahmad@email.com")
         alamat_p1 = st.text_area("Alamat Lengkap Pemohon I", value="RT 01 RW 02, Desa Purwokerto, Kec. Purwokerto Barat, Kab. Banyumas")
 
     # --- 3. Data Pemohon II (Istri) ---
@@ -298,6 +302,7 @@ with col_form:
             detail_status_p2_text = f"Surat Kematian No: {no_surat_m2} tgl {format_indo_date(tgl_surat_m2)} (meninggal tgl {format_indo_date(tgl_mati2)}) diterbitkan {penerbit_m2}"
 
         telepon_p2 = st.text_input("No. Telepon/HP Pemohon II", value="08987654321")
+        email_p2 = st.text_input("Email Pemohon II", value="siti@email.com")
         alamat_p2 = st.text_area("Alamat Lengkap Pemohon II", value="RT 01 RW 02, Desa Purwokerto, Kec. Purwokerto Barat, Kab. Banyumas")
 
     # --- 4. Detail Pernikahan Sirri ---
@@ -395,6 +400,7 @@ form_data = {
         "status": status_p1,
         "detail_status_text": detail_status_p1_text,
         "telepon": telepon_p1,
+        "email": email_p1,
         "alamat": alamat_p1
     },
     "p2": {
@@ -408,6 +414,7 @@ form_data = {
         "status": status_p2,
         "detail_status_text": detail_status_p2_text,
         "telepon": telepon_p2,
+        "email": email_p2,
         "alamat": alamat_p2
     },
     "tgl_nikah": tgl_nikah,
