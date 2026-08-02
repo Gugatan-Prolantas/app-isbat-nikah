@@ -1,6 +1,7 @@
 import io
 import docx
 import streamlit as st
+from datetime import datetime, date
 
 def replace_text_in_document(doc, replacements):
     """Fungsi untuk mengganti teks placeholder di paragraf dan tabel."""
@@ -17,9 +18,24 @@ def replace_text_in_document(doc, replacements):
         for table in doc.tables:
             for row in table.rows:
                 for cell in row.cells:
-                    for p in cell.paragraphs:
-                        if placeholder in p.text:
-                            p.text = p.text.replace(placeholder, str_val)
+                    if placeholder in cell.text:
+                        for p in cell.paragraphs:
+                            if placeholder in p.text:
+                                p.text = p.text.replace(placeholder, str_val)
+
+def hitung_umur(born, target_date):
+    """Menghitung umur berdasarkan tanggal lahir dan tanggal target."""
+    if born is None or target_date is None:
+        return 0
+    return target_date.year - born.year - ((target_date.month, target_date.day) < (born.month, born.day))
+
+def format_tanggal_indo(dt):
+    """Mengubah format datetime.date ke teks Bahasa Indonesia (misal: 2 Agustus 2026)."""
+    bulan_indo = [
+        "", "Januari", "Februari", "Maret", "April", "Mei", "Juni",
+        "Juli", "Agustus", "September", "Oktober", "November", "Desember"
+    ]
+    return f"{dt.day} {bulan_indo[dt.month]} {dt.year}"
 
 # Konfigurasi Tampilan Halaman
 st.set_page_config(page_title="Form Permohonan Isbat Nikah", layout="wide")
@@ -30,7 +46,10 @@ st.write("Isi formulir di bawah ini untuk membuat dokumen permohonan Isbat Nikah
 # Formulir Input
 with st.form("form_isbat"):
     st.subheader("1. Informasi Permohonan")
-    tanggal_permohonan = st.text_input("Tanggal Surat Permohonan", value="2 Agustus 2026")
+    
+    # Input tanggal permohonan menggunakan Date Picker (Default: Hari Ini)
+    tgl_permohonan_val = st.date_input("Tanggal Surat Permohonan", value=date.today())
+    tanggal_permohonan_str = format_tanggal_indo(tgl_permohonan_val)
 
     col1, col2 = st.columns(2)
 
@@ -39,8 +58,20 @@ with st.form("form_isbat"):
         nama_p1 = st.text_input("Nama Lengkap Pemohon I")
         nik_p1 = st.text_input("NIK Pemohon I")
         tempat_lahir_p1 = st.text_input("Tempat Lahir Pemohon I")
-        tanggal_lahir_p1 = st.text_input("Tanggal Lahir Pemohon I (contoh: 12 Mei 1988)")
-        umur_p1 = st.text_input("Umur Pemohon I (tahun)")
+        
+        # Date Picker untuk Tanggal Lahir Pemohon I
+        tgl_lahir_p1_val = st.date_input(
+            "Tanggal Lahir Pemohon I", 
+            value=date(1990, 1, 1),
+            min_value=date(1940, 1, 1),
+            max_value=date.today()
+        )
+        tanggal_lahir_p1_str = format_tanggal_indo(tgl_lahir_p1_val)
+        
+        # Hitung Umur Otomatis
+        umur_p1 = hitung_umur(tgl_lahir_p1_val, tgl_permohonan_val)
+        st.info(f"💡 **Umur Pemohon I:** {umur_p1} tahun (dihitung otomatis)")
+
         pekerjaan_p1 = st.text_input("Pekerjaan Pemohon I")
         pendidikan_p1 = st.text_input("Pendidikan Pemohon I")
         telepon_p1 = st.text_input("Nomor Telepon Pemohon I")
@@ -53,8 +84,20 @@ with st.form("form_isbat"):
         nama_p2 = st.text_input("Nama Lengkap Pemohon II")
         nik_p2 = st.text_input("NIK Pemohon II")
         tempat_lahir_p2 = st.text_input("Tempat Lahir Pemohon II")
-        tanggal_lahir_p2 = st.text_input("Tanggal Lahir Pemohon II (contoh: 20 Agustus 1992)")
-        umur_p2 = st.text_input("Umur Pemohon II (tahun)")
+        
+        # Date Picker untuk Tanggal Lahir Pemohon II
+        tgl_lahir_p2_val = st.date_input(
+            "Tanggal Lahir Pemohon II", 
+            value=date(1995, 1, 1),
+            min_value=date(1940, 1, 1),
+            max_value=date.today()
+        )
+        tanggal_lahir_p2_str = format_tanggal_indo(tgl_lahir_p2_val)
+        
+        # Hitung Umur Otomatis
+        umur_p2 = hitung_umur(tgl_lahir_p2_val, tgl_permohonan_val)
+        st.info(f"💡 **Umur Pemohon II:** {umur_p2} tahun (dihitung otomatis)")
+
         pekerjaan_p2 = st.text_input("Pekerjaan Pemohon II")
         pendidikan_p2 = st.text_input("Pendidikan Pemohon II")
         telepon_p2 = st.text_input("Nomor Telepon Pemohon II")
@@ -65,7 +108,9 @@ with st.form("form_isbat"):
     st.subheader("4. Detail Pernikahan Sirri")
     col3, col4 = st.columns(2)
     with col3:
-        tanggal_nikah_sirri = st.text_input("Tanggal Nikah Sirri", value="10 Januari 2015")
+        tgl_nikah_val = st.date_input("Tanggal Nikah Sirri", value=date(2015, 1, 10))
+        tanggal_nikah_sirri_str = format_tanggal_indo(tgl_nikah_val)
+        
         tempat_nikah_sirri = st.text_input("Tempat Nikah Sirri", value="Purwokerto")
         hubungan_wali_nikah_p2 = st.text_input("Hubungan Wali Nikah dengan Pemohon II", value="Ayah Kandung")
         nama_wali = st.text_input("Nama Wali Nikah")
@@ -97,11 +142,11 @@ with st.form("form_isbat"):
 if submit_button:
     # Mengumpulkan semua input ke dalam dictionary
     data_input = {
-        "tanggal_permohonan": tanggal_permohonan,
+        "tanggal_permohonan": tanggal_permohonan_str,
         "nama_pemohon1": nama_p1,
         "nik_pemohon1": nik_p1,
         "tempat_lahir_pemohon1": tempat_lahir_p1,
-        "tanggal_lahir_pemohon1": tanggal_lahir_p1,
+        "tanggal_lahir_pemohon1": tanggal_lahir_p1_str,
         "umur_pemohon1": umur_p1,
         "pekerjaan_pemohon1": pekerjaan_p1,
         "pendidikan_pemohon1": pendidikan_p1,
@@ -111,14 +156,14 @@ if submit_button:
         "nama_pemohon2": nama_p2,
         "nik_pemohon2": nik_p2,
         "tempat_lahir_pemohon2": tempat_lahir_p2,
-        "tanggal_lahir_pemohon2": tanggal_lahir_p2,
+        "tanggal_lahir_pemohon2": tanggal_lahir_p2_str,
         "umur_pemohon2": umur_p2,
         "pekerjaan_pemohon2": pekerjaan_p2,
         "pendidikan_pemohon2": pendidikan_p2,
         "nomor_telepon_pemohon2": telepon_p2,
         "email_pemohon2": email_p2,
         "alamat_pemohon2": alamat_p2,
-        "tanggal_nikah_sirri": tanggal_nikah_sirri,
+        "tanggal_nikah_sirri": tanggal_nikah_sirri_str,
         "tempat_nikah_sirri": tempat_nikah_sirri,
         "hubungan_wali_nikah_p2": hubungan_wali_nikah_p2,
         "nama_wali": nama_wali,
@@ -141,7 +186,7 @@ if submit_button:
         # Jalankan fungsi penggantian kata
         replace_text_in_document(doc, data_input)
 
-        # Simpan hasil ke memori buffer untuk siap diunduh
+        # Simpan hasil ke memori buffer
         doc_io = io.BytesIO()
         doc.save(doc_io)
         doc_io.seek(0)
