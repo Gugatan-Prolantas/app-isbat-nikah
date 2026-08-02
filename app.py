@@ -56,7 +56,11 @@ def build_letter_text(data):
     # Wali text
     wali_str = data['hubungan_wali']
     if data['hubungan_wali'] != 'Ayah Kandung' and data['alasan_wali']:
-        wali_str += f", {data['alasan_wali']}"
+        wali_str += f" ({data['alasan_wali']})"
+
+    # Handle optional status details gracefully to avoid blank lines
+    status_detail_p1 = f"\n   Keterangan       : {p1['detail_status_text']}" if p1['detail_status_text'] else ""
+    status_detail_p2 = f"\n   Keterangan       : {p2['detail_status_text']}" if p2['detail_status_text'] else ""
 
     text = f"""PERMOHONAN ISBAT NIKAH (PENGESAHAN NIKAH)
 
@@ -74,24 +78,23 @@ Dengan hormat, kami yang bertanda tangan di bawah ini:
    Tempat/Tgl Lahir : {p1['tempat_lahir']}, {format_indo_date(p1['tgl_lahir'])} (Umur: {p1['umur']} tahun)
    Pekerjaan        : {p1['pekerjaan']}
    Pendidikan       : {p1['pendidikan']}
-   Status           : {p1['status']}
+   Status           : {p1['status']}{status_detail_p1}
    Alamat           : {p1['alamat']}
    No. Telepon      : {p1['telepon']}
-   {p1['detail_status_text']}
 
 2. NAMA             : {p2['nama']}
    NIK              : {p2['nik']}
    Tempat/Tgl Lahir : {p2['tempat_lahir']}, {format_indo_date(p2['tgl_lahir'])} (Umur: {p2['umur']} tahun)
    Pekerjaan        : {p2['pekerjaan']}
    Pendidikan       : {p2['pendidikan']}
-   Status           : {p2['status']}
+   Status           : {p2['status']}{status_detail_p2}
    Alamat           : {p2['alamat']}
    No. Telepon      : {p2['telepon']}
-   {p2['detail_status_text']}
 
 Selanjutnya disebut sebagai Pemohon I dan Pemohon II.
 
-Menyatakan bahwa Pemohon I dan Pemohon II telah melangsungkan pernikahan secara syariat Islam pada tanggal {format_indo_date(data['tgl_nikah'])} di {data['tempat_nikah']} dengan wali {data['nama_wali']} ({wali_str}) dan mas kawin/mahar {data['mahar']}.
+Menyatakan bahwa Pemohon I dan Pemohon II telah melangsungkan pernikahan secara syariat Islam pada tanggal {format_indo_date(data['tgl_nikah'])} di {data['tempat_nikah']}.
+Pernikahan tersebut dilaksanakan dengan wali nikah {data['nama_wali']} selaku {wali_str}, di hadapan {data['yang_menikahkan']}, disaksikan oleh dua orang saksi bernama {data['saksi1']} dan {data['saksi2']}, dengan mas kawin/mahar berupa {data['mahar']}.
 
 Bahwa selama pernikahan tersebut, Pemohon I dan Pemohon II {anak_str}
 
@@ -153,7 +156,7 @@ def generate_docx(data):
         p.add_run(f"   Pendidikan: {applicant['pendidikan']}\n")
         p.add_run(f"   Status: {applicant['status']}\n")
         if applicant['detail_status_text']:
-            p.add_run(f"   Keterangan Status: {applicant['detail_status_text']}\n")
+            p.add_run(f"   Keterangan: {applicant['detail_status_text']}\n")
         p.add_run(f"   Alamat: {applicant['alamat']}\n")
         p.add_run(f"   No. Telp: {applicant['telepon']}")
 
@@ -165,12 +168,14 @@ def generate_docx(data):
     # Marriage details
     wali_str = data['hubungan_wali']
     if data['hubungan_wali'] != 'Ayah Kandung' and data['alasan_wali']:
-        wali_str += f", {data['alasan_wali']}"
+        wali_str += f" ({data['alasan_wali']})"
 
     doc.add_paragraph(
         f"Menyatakan bahwa Pemohon I dan Pemohon II telah melangsungkan pernikahan secara syariat Islam "
-        f"pada tanggal {format_indo_date(data['tgl_nikah'])} di {data['tempat_nikah']} dengan wali "
-        f"{data['nama_wali']} ({wali_str}) serta mas kawin {data['mahar']}."
+        f"pada tanggal {format_indo_date(data['tgl_nikah'])} di {data['tempat_nikah']}. "
+        f"Pernikahan tersebut dilaksanakan dengan wali nikah {data['nama_wali']} selaku {wali_str}, "
+        f"di hadapan {data['yang_menikahkan']}, disaksikan oleh dua orang saksi bernama {data['saksi1']} dan {data['saksi2']}, "
+        f"dengan mas kawin/mahar berupa {data['mahar']}."
     )
 
     # Children
@@ -314,8 +319,8 @@ with col_form:
         mahar = st.text_input("Mas Kawin / Mahar", value="Uang tunai Rp 500.000,- dan seperangkat alat shalat")
         
         c3, c4 = st.columns(2)
-        saksi1 = c3.text_input("Saksi Nikah I", value="Saksi 1")
-        saksi2 = c4.text_input("Saksi Nikah II", value="Saksi 2")
+        saksi1 = c3.text_input("Saksi Nikah I", value="Bpk. Umar")
+        saksi2 = c4.text_input("Saksi Nikah II", value="Bpk. Usman")
 
     # --- 5. Alasan & Tujuan Permohonan ---
     with st.expander("5. Alasan & Tujuan Permohonan", expanded=True):
