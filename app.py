@@ -348,20 +348,20 @@ def generate_docx(data):
 
     # Format Biodata dengan tabel
     table_bio = doc.add_table(rows=0, cols=3)
-    table_bio.autofit = False # Matikan fitur autofit yang sering merusak ukuran kolom
+    table_bio.autofit = False 
+    table_bio.allow_autofit = False # Ekstra pengamanan ganda untuk mematikan autofit Word
     
-    # Kunci ukuran lebar masing-masing kolom secara permanen (Total 15cm)
-    for col, width in zip(table_bio.columns, (Cm(4.0), Cm(0.5), Cm(10.5))):
-        col.width = width
-
     def add_bio_row(label, value):
         row_cells = table_bio.add_row().cells
         row_cells[0].text = label
-        row_cells[0].width = Cm(4.0)
+        
+        # Kolom titik dua diatur ke tengah (center)
         row_cells[1].text = ":"
-        row_cells[1].width = Cm(0.5)
+        row_cells[1].paragraphs[0].alignment = WD_ALIGN_PARAGRAPH.CENTER
+        
+        # Kolom isi data diatur rata kiri-kanan (justify)
         row_cells[2].text = value
-        row_cells[2].width = Cm(10.5)
+        row_cells[2].paragraphs[0].alignment = WD_ALIGN_PARAGRAPH.JUSTIFY
 
     add_bio_row("Nama", p1['nama'])
     add_bio_row("NIK", p1['nik'])
@@ -382,6 +382,16 @@ def generate_docx(data):
     add_bio_row("Nomor telepon", p2['telepon'])
     add_bio_row("Email", p2['email'])
     add_bio_row("Alamat", f"{p2['alamat']}, selanjutnya disebut sebagai Pemohon II;")
+
+    # TRIK AMPUH: Kunci paksa ukuran lebar tiap baris & sel SETELAH semua data terisi
+    widths = (Cm(4.0), Cm(0.5), Cm(10.5))
+    
+    for row in table_bio.rows:
+        for idx, width in enumerate(widths):
+            row.cells[idx].width = width
+            
+    for col, width in zip(table_bio.columns, widths):
+        col.width = width
 
     doc.add_paragraph("\nDengan ini mengajukan pemohonan pengesahan nikah, dengan alasan sebagai berikut:")
 
