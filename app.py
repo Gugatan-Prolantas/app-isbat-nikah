@@ -76,22 +76,22 @@ Yang bertanda tangan di bawah ini :
 Nama\t\t\t: {p1['nama']} 
 NIK\t\t\t: {p1['nik']}
 Tempat Tgl Lahir\t: {p1['tempat_lahir']}, {format_indo_date(p1['tgl_lahir'])} (umur {p1['umur']} tahun)
-Agama \t\t\t: Islam
+Agama \t\t: Islam
 Pekerjaan \t\t: {p1['pekerjaan']}
 Pendidikan \t\t: {p1['pendidikan']}
 Nomor telepon\t\t: {p1['telepon']}
 Email\t\t\t: {p1['email']}
-Alamat\t\t\t: {p1['alamat']}, selanjutnya disebut sebagai Pemohon I;
+Alamat\t\t: {p1['alamat']}, selanjutnya disebut sebagai Pemohon I;
 
 Nama\t\t\t: {p2['nama']} 
 NIK\t\t\t: {p2['nik']}
 Tempat Tgl Lahir\t: {p2['tempat_lahir']}, {format_indo_date(p2['tgl_lahir'])} (umur {p2['umur']} tahun)
-Agama \t\t\t: Islam
+Agama \t\t: Islam
 Pekerjaan \t\t: {p2['pekerjaan']}
 Pendidikan \t\t: {p2['pendidikan']}
 Nomor telepon\t\t: {p2['telepon']}
 Email\t\t\t: {p2['email']}
-Alamat\t\t\t: {p2['alamat']}, selanjutnya disebut sebagai Pemohon II;
+Alamat\t\t: {p2['alamat']}, selanjutnya disebut sebagai Pemohon II;
 
 Dengan ini mengajukan pemohonan pengesahan nikah, dengan alasan sebagai berikut:
 
@@ -169,12 +169,12 @@ def generate_docx(data):
             f"Nama\t\t\t: {applicant['nama']}\n"
             f"NIK\t\t\t: {applicant['nik']}\n"
             f"Tempat Tgl Lahir\t: {applicant['tempat_lahir']}, {format_indo_date(applicant['tgl_lahir'])} (umur {applicant['umur']} tahun)\n"
-            f"Agama\t\t\t: Islam\n"
+            f"Agama\t\t: Islam\n"
             f"Pekerjaan\t\t: {applicant['pekerjaan']}\n"
             f"Pendidikan\t\t: {applicant['pendidikan']}\n"
             f"Nomor telepon\t: {applicant['telepon']}\n"
             f"Email\t\t\t: {applicant['email']}\n"
-            f"Alamat\t\t\t: {applicant['alamat']}, selanjutnya disebut sebagai {title};\n"
+            f"Alamat\t\t: {applicant['alamat']}, selanjutnya disebut sebagai {title};\n"
         )
         p.add_run(fmt)
 
