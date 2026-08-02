@@ -395,9 +395,10 @@ def generate_docx(data):
     anak_str = "belum dikaruniai anak"
     if data['status_anak'] == 'sudah' and data['anak_list']:
         anak_str = f"telah dikaruniai {len(data['anak_list'])} orang anak, yaitu:\n"
-        for idx, child in enumerate(data['anak_list'], 1):
+        for idx_child, child in enumerate(data['anak_list'], 1):
             c_ttl = f"{child['tempat']}, {format_indo_date(child['tgl_lahir'])}"
-            anak_str += f"{idx}. {child['nama']}, lahir di {c_ttl} (umur {child['umur']} tahun)\n"
+            # Menggunakan \t agar sejajar dengan pengaturan margin indent di bawah
+            anak_str += f"{idx_child}.\t{child['nama']}, lahir di {c_ttl} (umur {child['umur']} tahun)\n"
         anak_str = anak_str.strip()
 
     posita_list = [
@@ -415,17 +416,25 @@ def generate_docx(data):
     ]
 
     for idx, text in enumerate(posita_list, 1):
+        lines = text.split('\n')
+        
         p = doc.add_paragraph()
         p.alignment = WD_ALIGN_PARAGRAPH.JUSTIFY
-        p.paragraph_format.left_indent = Cm(0.7)
-        p.paragraph_format.first_line_indent = Cm(-0.7)
-        lines = text.split('\n')
-        p.add_run(f"{idx}. {lines[0]}")
+        # Membuat pola Hanging Indent (Kondisi Baris 1 menjorok ke luar, Baris 2 menjorok ke dalam)
+        p.paragraph_format.left_indent = Cm(1.25)
+        p.paragraph_format.first_line_indent = Cm(-1.25)
+        
+        # Angka, lalu pencet Tab (\t), lalu teks
+        p.add_run(f"{idx}.\t{lines[0]}")
+        
+        # Jika ada sub-list (seperti list nama anak yang turun ke bawah)
         if len(lines) > 1:
             for line in lines[1:]:
                 p_child = doc.add_paragraph()
                 p_child.alignment = WD_ALIGN_PARAGRAPH.JUSTIFY
-                p_child.paragraph_format.left_indent = Cm(1.5)
+                # Indent digeser lebih dalam lagi sejauh 2.5 cm khusus untuk list nama anak
+                p_child.paragraph_format.left_indent = Cm(2.5)
+                p_child.paragraph_format.first_line_indent = Cm(-1.25)
                 p_child.add_run(line)
 
     doc.add_paragraph("\nBahwa berdasarkan alasan-alasan tersebut di atas para Pemohon mohon kepada Ketua Pengadilan Agama Purwokerto cq. Majelis hakim yang memeriksa perkara ini berkenan menetapkan sebagai berikut :")
@@ -439,16 +448,16 @@ def generate_docx(data):
     for idx, text in enumerate(petitum_primer, 1):
         p = doc.add_paragraph()
         p.alignment = WD_ALIGN_PARAGRAPH.JUSTIFY
-        p.paragraph_format.left_indent = Cm(0.7)
-        p.paragraph_format.first_line_indent = Cm(-0.7)
-        p.add_run(f"{idx}. {text}")
+        p.paragraph_format.left_indent = Cm(1.25)
+        p.paragraph_format.first_line_indent = Cm(-1.25)
+        p.add_run(f"{idx}.\t{text}")
 
     doc.add_paragraph("Subsider :")
     p_sub = doc.add_paragraph()
     p_sub.alignment = WD_ALIGN_PARAGRAPH.JUSTIFY
-    p_sub.paragraph_format.left_indent = Cm(0.7)
-    p_sub.paragraph_format.first_line_indent = Cm(-0.7)
-    p_sub.add_run("-  Atau bilamana majelis hakim yang memeriksa perkara ini berpendapat lain, mohon penetapan yang seadil-adilnya;")
+    p_sub.paragraph_format.left_indent = Cm(1.25)
+    p_sub.paragraph_format.first_line_indent = Cm(-1.25)
+    p_sub.add_run("-\tAtau bilamana majelis hakim yang memeriksa perkara ini berpendapat lain, mohon penetapan yang seadil-adilnya;")
 
     doc.add_paragraph("\nDemikian permohonan para Pemohon, dan atas terkabulnya para Pemohon ucapkan terima kasih.\nWassalam\n")
 
@@ -471,8 +480,9 @@ def generate_docx(data):
     doc.save(buffer)
     buffer.seek(0)
     return buffer
+
 # --- Banner Kustom untuk Header Aplikasi ---
-logo_path = "logo_PA_Pwt.png"
+logo_path = "logo_PA_Pwt.jpg"
 logo_html = '<span style="font-size: 4rem;">⚖️</span>' # Fallback jika gambar tidak ditemukan
 
 if os.path.exists(logo_path):
