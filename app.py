@@ -19,11 +19,11 @@ try:
     from docx.oxml import OxmlElement
     from docx.oxml.ns import qn
     DOCX_AVAILABLE = True
-except ImportError:
-    DOCX_AVAILABLE = False
+    except ImportError:
+        DOCX_AVAILABLE = False
 
 st.set_page_config(
-    page_title="Generator Surat Permohonan Isbat Nikah",
+    page_title="Aplikasi Permohonan Isbat Nikah",
     page_icon="⚖️",
     layout="wide"
 )
@@ -238,22 +238,22 @@ Yang bertanda tangan di bawah ini :
 Nama\t\t\t: {p1['nama']}
 NIK\t\t\t: {p1['nik']}
 Tempat Tgl Lahir\t: {p1['tempat_lahir']}, {format_indo_date(p1['tgl_lahir'])} (umur {p1['umur']} tahun)
-Agama\t\t: Islam
+Agama\t\t\t: Islam
 Pekerjaan\t\t: {p1['pekerjaan']}
 Pendidikan\t\t: {p1['pendidikan']}
 Nomor telepon\t\t: {p1['telepon']}
 Email\t\t\t: {p1['email']}
-Alamat\t\t: {p1['alamat']}, selanjutnya disebut sebagai Pemohon I;
+Alamat\t\t\t: {p1['alamat']}, selanjutnya disebut sebagai Pemohon I;
 
 Nama\t\t\t: {p2['nama']}
 NIK\t\t\t: {p2['nik']}
 Tempat Tgl Lahir\t: {p2['tempat_lahir']}, {format_indo_date(p2['tgl_lahir'])} (umur {p2['umur']} tahun)
-Agama\t\t: Islam
+Agama\t\t\t: Islam
 Pekerjaan\t\t: {p2['pekerjaan']}
 Pendidikan\t\t: {p2['pendidikan']}
 Nomor telepon\t\t: {p2['telepon']}
 Email\t\t\t: {p2['email']}
-Alamat\t\t: {p2['alamat']}, selanjutnya disebut sebagai Pemohon II;
+Alamat\t\t\t: {p2['alamat']}, selanjutnya disebut sebagai Pemohon II;
 
 Dengan ini mengajukan pemohonan pengesahan nikah, dengan alasan sebagai berikut:
 
@@ -441,8 +441,8 @@ def generate_docx(data):
 # Banner Kustom untuk Header Aplikasi
 st.markdown("""
     <div class="header-banner">
-        <h1 class="header-title">⚖️ Generator Surat Isbat Nikah</h1>
-        <p class="header-subtitle">Aplikasi Resmi Pembuat Format Permohonan Isbat Nikah</p>
+        <h1 class="header-title">⚖️ Aplikasi Permohonan Isbat Nikah</h1>
+        <p class="header-subtitle">Aplikasi Pembantu Pembuatan Permohonan Isbat Nikah</p>
     </div>
 """, unsafe_allow_html=True)
 
