@@ -226,7 +226,12 @@ with col_form:
         
         c3, c4 = st.columns(2)
         tempat_lahir_p1 = c3.text_input("Tempat Lahir (Pemohon I)", value="Banyumas")
-        tgl_lahir_p1 = c4.date_input("Tanggal Lahir (Pemohon I)", value=datetime.date(1990, 1, 1))
+        tgl_lahir_p1 = c4.date_input(
+            "Tanggal Lahir (Pemohon I)", 
+            value=datetime.date(1990, 1, 1),
+            min_value=datetime.date(1900, 1, 1),
+            max_value=datetime.date.today()
+        )
         
         umur_p1 = calculate_age(tgl_lahir_p1, tgl_permohonan)
         st.info(f"💡 **Umur Pemohon I:** {umur_p1} tahun (dihitung otomatis)")
@@ -269,7 +274,12 @@ with col_form:
         
         c3, c4 = st.columns(2)
         tempat_lahir_p2 = c3.text_input("Tempat Lahir (Pemohon II)", value="Banyumas")
-        tgl_lahir_p2 = c4.date_input("Tanggal Lahir (Pemohon II)", value=datetime.date(1995, 1, 1))
+        tgl_lahir_p2 = c4.date_input(
+            "Tanggal Lahir (Pemohon II)", 
+            value=datetime.date(1995, 1, 1),
+            min_value=datetime.date(1900, 1, 1),
+            max_value=datetime.date.today()
+        )
         
         umur_p2 = calculate_age(tgl_lahir_p2, tgl_permohonan)
         st.info(f"💡 **Umur Pemohon II:** {umur_p2} tahun (dihitung otomatis)")
@@ -349,7 +359,13 @@ with col_form:
                 c1, c2, c3 = st.columns([4, 3, 3])
                 c_nama = c1.text_input(f"Nama Anak #{i+1}", value=d_nama, key=f"c_nama_{i}")
                 c_tempat = c2.text_input(f"Tempat Lahir #{i+1}", value=d_tempat, key=f"c_tempat_{i}")
-                c_tgl = c3.date_input(f"Tanggal Lahir #{i+1}", value=d_tgl, key=f"c_tgl_{i}")
+                c_tgl = c3.date_input(
+                    f"Tanggal Lahir #{i+1}", 
+                    value=d_tgl, 
+                    min_value=datetime.date(1950, 1, 1),
+                    max_value=datetime.date.today(),
+                    key=f"c_tgl_{i}"
+                )
                 
                 c_umur = calculate_age(c_tgl, tgl_permohonan)
                 st.caption(f"-> Umur Anak ke-{i+1}: **{c_umur} tahun**")
