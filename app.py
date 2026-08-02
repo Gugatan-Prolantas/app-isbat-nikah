@@ -466,7 +466,7 @@ def generate_docx(data):
     return buffer
 
 # --- Banner Kustom untuk Header Aplikasi ---
-logo_path = "logo_PA_Pwt.png"
+logo_path = "logo_PA_Pwt.jpg"
 logo_html = '<span style="font-size: 4rem;">⚖️</span>' # Fallback jika gambar tidak ditemukan
 
 if os.path.exists(logo_path):
@@ -516,6 +516,8 @@ with col_form:
         status_p1 = st.selectbox("Status Saat Nikah (Pemohon I)", ["Jejaka", "Duda Cerai", "Duda Mati"])
 
         detail_status_p1_text = ""
+        tgl_ac = None
+        tgl_mati = None
         if status_p1 == "Duda Cerai":
             no_ac = st.text_input("No. Akta Cerai (P1)", value="1234/AC/2020/PA.Pwt")
             tgl_ac = st.date_input("Tanggal Akta Cerai (P1)", value=datetime.date(2020, 5, 10))
@@ -525,11 +527,6 @@ with col_form:
             tgl_mati = st.date_input("Tanggal Kematian Istri (P1)", value=datetime.date(2019, 1, 10))
             no_surat_m = st.text_input("No. Surat Kematian (P1)", value="474.3/01/2019")
             detail_status_p1_text = f"Srt. Kematian No: {no_surat_m} meninggal tgl {format_indo_date(tgl_mati)}"
-
-        c5, c6 = st.columns(2)
-        telepon_p1 = c5.text_input("No. Telepon/HP Pemohon I", value="08123456789")
-        email_p1 = c6.text_input("Email Pemohon I", value="ahmad@email.com")
-        alamat_p1 = st.text_area("Alamat Lengkap Pemohon I", value="RT 01 RW 02, Desa Purwokerto, Kec. Purwokerto Barat, Kab. Banyumas")
 
     with st.expander("3. Data Pemohon II (Istri)", expanded=True):
         c1, c2 = st.columns(2)
@@ -550,6 +547,8 @@ with col_form:
         status_p2 = st.selectbox("Status Saat Nikah (Pemohon II)", ["Perawan", "Janda Cerai", "Janda Mati"])
 
         detail_status_p2_text = ""
+        tgl_ac2 = None
+        tgl_mati2 = None
         if status_p2 == "Janda Cerai":
             no_ac2 = st.text_input("No. Akta Cerai (P2)", value="5678/AC/2021/PA.Pwt")
             tgl_ac2 = st.date_input("Tanggal Akta Cerai (P2)", value=datetime.date(2021, 8, 15))
@@ -559,11 +558,6 @@ with col_form:
             tgl_mati2 = st.date_input("Tanggal Kematian Suami (P2)", value=datetime.date(2020, 2, 10))
             no_surat_m2 = st.text_input("No. Surat Kematian (P2)", value="474.3/02/2020")
             detail_status_p2_text = f"Srt. Kematian No: {no_surat_m2} meninggal tgl {format_indo_date(tgl_mati2)}"
-
-        c5, c6 = st.columns(2)
-        telepon_p2 = c5.text_input("No. Telepon/HP Pemohon II", value="08987654321")
-        email_p2 = c6.text_input("Email Pemohon II", value="siti@email.com")
-        alamat_p2 = st.text_area("Alamat Lengkap Pemohon II", value="RT 01 RW 02, Desa Purwokerto, Kec. Purwokerto Barat, Kab. Banyumas")
 
     with st.expander("4. Detail Pernikahan Sirri", expanded=True):
         c1, c2 = st.columns(2)
@@ -621,6 +615,35 @@ form_data = {
 with col_preview:
     st.header("📄 Pratinjau Dokumen")
     
+    # --- LOGIKA VALIDASI POTENSI GAGAL ---
+    warnings = []
+    
+    # Cek Validasi P1 (Suami)
+    if status_p1 == "Duda Cerai" and tgl_ac and tgl_nikah < tgl_ac:
+        warnings.append("Tanggal nikah sirri lebih dahulu daripada tanggal akta cerai Pemohon I.")
+    if status_p1 == "Duda Mati" and tgl_mati and tgl_nikah < tgl_mati:
+        warnings.append("Tanggal nikah sirri lebih dahulu daripada tanggal kematian istri Pemohon I.")
+        
+    # Cek Validasi P2 (Istri)
+    if status_p2 == "Janda Cerai" and tgl_ac2:
+        if tgl_nikah < tgl_ac2:
+            warnings.append("Tanggal nikah sirri lebih dahulu daripada tanggal akta cerai Pemohon II.")
+        else:
+            selisih_hari = (tgl_nikah - tgl_ac2).days
+            if selisih_hari < 90:
+                warnings.append(f"Jarak antara tanggal nikah sirri dengan tanggal akta cerai Pemohon II kurang dari 90 hari (Masa iddah berpotensi belum selesai, selisih hanya {selisih_hari} hari).")
+    
+    if status_p2 == "Janda Mati" and tgl_mati2 and tgl_nikah < tgl_mati2:
+        warnings.append("Tanggal nikah sirri lebih dahulu daripada tanggal kematian suami Pemohon II.")
+
+    # Menampilkan Notifikasi Error jika ada peringatan
+    if warnings:
+        pesan_error = "⚠️ **PERINGATAN: Permohonan berpotensi tidak diloloskan verifikasi karena:**\n"
+        for w in warnings:
+            pesan_error += f"\n- {w}"
+        st.error(pesan_error)
+    # ------------------------------------
+
     if st.button("💾 Simpan Data ke Database", type="primary", use_container_width=True):
         if save_to_db(form_data):
             st.success(f"Berhasil menyimpan data atas nama {nama_p1} & {nama_p2} ke database!")
