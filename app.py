@@ -466,15 +466,15 @@ def generate_docx(data):
     return buffer
 
 # --- Banner Kustom untuk Header Aplikasi ---
-logo_path = "logo PA Pwt.png"
+logo_path = "logo_PA_Pwt.jpg"
 logo_html = '<span style="font-size: 4rem;">⚖️</span>' # Fallback jika gambar tidak ditemukan
 
 if os.path.exists(logo_path):
     with open(logo_path, "rb") as image_file:
         encoded_string = base64.b64encode(image_file.read()).decode()
     
-    # Gunakan image/png karena file sekarang berformat .png
-    logo_html = f'<img src="data:image/png;base64,{encoded_string}" class="banner-logo" alt="Logo PA Purwokerto">'
+    # Gunakan image/jpeg karena file sekarang bernama logo_PA_Pwt.jpg
+    logo_html = f'<img src="data:image/jpeg;base64,{encoded_string}" class="banner-logo" alt="Logo PA Purwokerto">'
 
 st.markdown(f"""
     <div class="header-banner">
