@@ -348,13 +348,20 @@ def generate_docx(data):
 
     # Format Biodata dengan tabel
     table_bio = doc.add_table(rows=0, cols=3)
+    table_bio.autofit = False # Matikan fitur autofit yang sering merusak ukuran kolom
+    
+    # Kunci ukuran lebar masing-masing kolom secara permanen (Total 15cm)
+    for col, width in zip(table_bio.columns, (Cm(4.0), Cm(0.5), Cm(10.5))):
+        col.width = width
+
     def add_bio_row(label, value):
         row_cells = table_bio.add_row().cells
         row_cells[0].text = label
-        row_cells[0].width = Cm(4)
+        row_cells[0].width = Cm(4.0)
         row_cells[1].text = ":"
         row_cells[1].width = Cm(0.5)
         row_cells[2].text = value
+        row_cells[2].width = Cm(10.5)
 
     add_bio_row("Nama", p1['nama'])
     add_bio_row("NIK", p1['nik'])
@@ -464,7 +471,6 @@ def generate_docx(data):
     doc.save(buffer)
     buffer.seek(0)
     return buffer
-
 # --- Banner Kustom untuk Header Aplikasi ---
 logo_path = "logo_PA_Pwt.png"
 logo_html = '<span style="font-size: 4rem;">⚖️</span>' # Fallback jika gambar tidak ditemukan
