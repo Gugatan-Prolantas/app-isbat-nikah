@@ -466,7 +466,7 @@ def generate_docx(data):
     return buffer
 
 # --- Banner Kustom untuk Header Aplikasi ---
-logo_path = "logo_PA_Pwt.jpg"
+logo_path = "logo_PA_Pwt.png"
 logo_html = '<span style="font-size: 4rem;">⚖️</span>' # Fallback jika gambar tidak ditemukan
 
 if os.path.exists(logo_path):
