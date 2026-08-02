@@ -19,8 +19,8 @@ try:
     from docx.oxml import OxmlElement
     from docx.oxml.ns import qn
     DOCX_AVAILABLE = True
-    except ImportError:
-        DOCX_AVAILABLE = False
+except ImportError:
+    DOCX_AVAILABLE = False
 
 st.set_page_config(
     page_title="Aplikasi Permohonan Isbat Nikah",
