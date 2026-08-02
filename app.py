@@ -126,9 +126,12 @@ def apply_custom_theme():
             gap: 25px;
         }
         .banner-logo {
-            height: 100px; /* Ukuran logo disesuaikan agar proporsional */
+            height: 115px; /* Sedikit dibesarkan agar proporsional */
             width: auto;
-            filter: drop-shadow(2px 4px 6px rgba(0,0,0,0.4)); /* Efek bayangan pada logo */
+            border-radius: 50%; /* Trik CSS memotong kotak putih menjadi bentuk oval */
+            border: 2.5px solid #D4AF37; /* Bingkai emas menutupi sisa pinggiran putih */
+            box-shadow: 0 4px 12px rgba(0,0,0,0.6); /* Efek bayangan tegas */
+            object-fit: cover;
         }
         .header-text-container {
             display: flex;
@@ -469,7 +472,9 @@ logo_html = '<span style="font-size: 4rem;">⚖️</span>' # Fallback jika gamba
 if os.path.exists(logo_path):
     with open(logo_path, "rb") as image_file:
         encoded_string = base64.b64encode(image_file.read()).decode()
-    logo_html = f'<img src="data:image/jpeg;base64,{encoded_string}" class="banner-logo" alt="Logo PA Purwokerto">'
+    
+    # Gunakan image/png karena file sekarang berformat .png
+    logo_html = f'<img src="data:image/png;base64,{encoded_string}" class="banner-logo" alt="Logo PA Purwokerto">'
 
 st.markdown(f"""
     <div class="header-banner">
