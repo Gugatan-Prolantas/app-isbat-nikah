@@ -43,6 +43,9 @@ st.set_page_config(page_title="Form Permohonan Isbat Nikah", layout="wide")
 st.title("📄 Generator Surat Permohonan Isbat Nikah")
 st.write("Isi formulir di bawah ini untuk membuat dokumen permohonan Isbat Nikah secara otomatis.")
 
+# Pilihan daftar pekerjaan baku
+OPSI_PEKERJAAN = ["Pegawai BUMN/BUMD", "ASN", "Anggota Polri", "Anggota TNI", "Lain-lain"]
+
 # Formulir Input
 with st.form("form_isbat"):
     st.subheader("1. Informasi Permohonan")
@@ -72,7 +75,13 @@ with st.form("form_isbat"):
         umur_p1 = hitung_umur(tgl_lahir_p1_val, tgl_permohonan_val)
         st.info(f"💡 **Umur Pemohon I:** {umur_p1} tahun (dihitung otomatis)")
 
-        pekerjaan_p1 = st.text_input("Pekerjaan Pemohon I")
+        # Pilihan Pekerjaan Pemohon I
+        pilihan_pekerjaan_p1 = st.selectbox("Pekerjaan Pemohon I", OPSI_PEKERJAAN, key="pilihan_p1")
+        if pilihan_pekerjaan_p1 == "Lain-lain":
+            pekerjaan_p1 = st.text_input("Sebutkan Pekerjaan Pemohon I", value="", placeholder="Contoh: Wiraswasta / Petani / Ibu Rumah Tangga")
+        else:
+            pekerjaan_p1 = pilihan_pekerjaan_p1
+
         pendidikan_p1 = st.text_input("Pendidikan Pemohon I")
         telepon_p1 = st.text_input("Nomor Telepon Pemohon I")
         email_p1 = st.text_input("Email Pemohon I")
@@ -98,7 +107,13 @@ with st.form("form_isbat"):
         umur_p2 = hitung_umur(tgl_lahir_p2_val, tgl_permohonan_val)
         st.info(f"💡 **Umur Pemohon II:** {umur_p2} tahun (dihitung otomatis)")
 
-        pekerjaan_p2 = st.text_input("Pekerjaan Pemohon II")
+        # Pilihan Pekerjaan Pemohon II
+        pilihan_pekerjaan_p2 = st.selectbox("Pekerjaan Pemohon II", OPSI_PEKERJAAN, key="pilihan_p2")
+        if pilihan_pekerjaan_p2 == "Lain-lain":
+            pekerjaan_p2 = st.text_input("Sebutkan Pekerjaan Pemohon II", value="", placeholder="Contoh: Ibu Rumah Tangga / Wiraswasta")
+        else:
+            pekerjaan_p2 = pilihan_pekerjaan_p2
+
         pendidikan_p2 = st.text_input("Pendidikan Pemohon II")
         telepon_p2 = st.text_input("Nomor Telepon Pemohon II")
         email_p2 = st.text_input("Email Pemohon II")
