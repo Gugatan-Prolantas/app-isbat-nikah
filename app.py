@@ -528,6 +528,12 @@ with col_form:
             no_surat_m = st.text_input("No. Surat Kematian (P1)", value="474.3/01/2019")
             detail_status_p1_text = f"Srt. Kematian No: {no_surat_m} meninggal tgl {format_indo_date(tgl_mati)}"
 
+        st.markdown("---")
+        c5, c6 = st.columns(2)
+        telepon_p1 = c5.text_input("Nomor Telepon Pemohon I", value="081234567890")
+        email_p1 = c6.text_input("Email Pemohon I", value="ahmad@email.com")
+        alamat_p1 = st.text_area("Alamat Lengkap Pemohon I", value="Jl. Merdeka No. 1, RT 01 RW 02, Kec. Purwokerto, Kab. Banyumas")
+
     with st.expander("3. Data Pemohon II (Istri)", expanded=True):
         c1, c2 = st.columns(2)
         nama_p2 = c1.text_input("Nama Lengkap Pemohon II", value="Siti Bintan")
@@ -558,6 +564,12 @@ with col_form:
             tgl_mati2 = st.date_input("Tanggal Kematian Suami (P2)", value=datetime.date(2020, 2, 10))
             no_surat_m2 = st.text_input("No. Surat Kematian (P2)", value="474.3/02/2020")
             detail_status_p2_text = f"Srt. Kematian No: {no_surat_m2} meninggal tgl {format_indo_date(tgl_mati2)}"
+            
+        st.markdown("---")
+        c5, c6 = st.columns(2)
+        telepon_p2 = c5.text_input("Nomor Telepon Pemohon II", value="081298765432")
+        email_p2 = c6.text_input("Email Pemohon II", value="siti@email.com")
+        alamat_p2 = st.text_area("Alamat Lengkap Pemohon II", value="Jl. Merdeka No. 1, RT 01 RW 02, Kec. Purwokerto, Kab. Banyumas")
 
     with st.expander("4. Detail Pernikahan Sirri", expanded=True):
         c1, c2 = st.columns(2)
