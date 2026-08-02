@@ -288,15 +288,34 @@ def generate_docx(data):
     p_petitum_intro.alignment = WD_ALIGN_PARAGRAPH.JUSTIFY
     p_petitum_intro.add_run("Bahwa berdasarkan alasan-alasan tersebut di atas para Pemohon mohon kepada Ketua Pengadilan Agama Purwokerto cq. Majelis hakim yang memeriksa perkara ini berkenan menetapkan sebagai berikut :")
     
-    p_petitum = doc.add_paragraph()
-    p_petitum.add_run("Primer :\n")
-    p_petitum.add_run("1.\tMengabulkan permohonan para Pemohon;\n")
-    p_petitum.add_run(f"2.\tMenyatakan sah perkawinan antara Pemohon I {p1['nama']} dengan Pemohon II, {p2['nama']} yang dilaksanakan pada tanggal {format_indo_date(data['tgl_nikah'])} di {data['tempat_nikah']};\n")
-    p_petitum.add_run("3.\tMenetapkan biaya perkara menurut ketentuan hukum dan perundang-undangan yang berlaku;\n\n")
-    p_petitum.add_run("Subsider :\n")
-    p_petitum.add_run("-\tAtau bilamana majelis hakim yang memeriksa perkara ini berpendapat lain, mohon penetapan yang seadil-adilnya;")
+    doc.add_paragraph("Primer :")
+    
+    primer_points = [
+        "Mengabulkan permohonan para Pemohon;",
+        f"Menyatakan sah perkawinan antara Pemohon I {p1['nama']} dengan Pemohon II, {p2['nama']} yang dilaksanakan pada tanggal {format_indo_date(data['tgl_nikah'])} di {data['tempat_nikah']};",
+        "Menetapkan biaya perkara menurut ketentuan hukum dan perundang-undangan yang berlaku;"
+    ]
+    
+    # Add Primer points with Numbering and Justified Alignment
+    for i, point_text in enumerate(primer_points, 1):
+        p = doc.add_paragraph()
+        p.alignment = WD_ALIGN_PARAGRAPH.JUSTIFY
+        # Hanging indent logic (0.3 inches indentation for the text, negative for the number)
+        p.paragraph_format.left_indent = Inches(0.3)
+        p.paragraph_format.first_line_indent = Inches(-0.3)
+        p.add_run(f"{i}.\t{point_text}")
 
-    doc.add_paragraph("Demikian permohonan para Pemohon, dan atas terkabulnya para Pemohon ucapkan terima kasih.\n\nWassalam\n\n")
+    p_subsider_title = doc.add_paragraph()
+    p_subsider_title.add_run("\nSubsider :")
+    
+    # Add Subsider point with Justified Alignment
+    p_subsider = doc.add_paragraph()
+    p_subsider.alignment = WD_ALIGN_PARAGRAPH.JUSTIFY
+    p_subsider.paragraph_format.left_indent = Inches(0.3)
+    p_subsider.paragraph_format.first_line_indent = Inches(-0.3)
+    p_subsider.add_run("-\tAtau bilamana majelis hakim yang memeriksa perkara ini berpendapat lain, mohon penetapan yang seadil-adilnya;")
+
+    doc.add_paragraph("\nDemikian permohonan para Pemohon, dan atas terkabulnya para Pemohon ucapkan terima kasih.\n\nWassalam\n\n")
 
     # Signatures Table for alignment
     table = doc.add_table(rows=3, cols=2)
