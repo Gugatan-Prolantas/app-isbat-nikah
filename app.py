@@ -5,7 +5,7 @@ from io import BytesIO
 # Try importing python-docx for Word file generation
 try:
     import docx
-    from docx.shared import Inches, Pt
+    from docx.shared import Inches, Pt, Cm
     from docx.enum.text import WD_ALIGN_PARAGRAPH
     DOCX_AVAILABLE = True
 except ImportError:
@@ -76,22 +76,22 @@ Yang bertanda tangan di bawah ini :
 Nama\t\t\t: {p1['nama']} 
 NIK\t\t\t: {p1['nik']}
 Tempat Tgl Lahir\t: {p1['tempat_lahir']}, {format_indo_date(p1['tgl_lahir'])} (umur {p1['umur']} tahun)
-Agama \t\t: Islam
+Agama \t\t\t: Islam
 Pekerjaan \t\t: {p1['pekerjaan']}
 Pendidikan \t\t: {p1['pendidikan']}
 Nomor telepon\t\t: {p1['telepon']}
 Email\t\t\t: {p1['email']}
-Alamat\t\t: {p1['alamat']}, selanjutnya disebut sebagai Pemohon I;
+Alamat\t\t\t: {p1['alamat']}, selanjutnya disebut sebagai Pemohon I;
 
 Nama\t\t\t: {p2['nama']} 
 NIK\t\t\t: {p2['nik']}
 Tempat Tgl Lahir\t: {p2['tempat_lahir']}, {format_indo_date(p2['tgl_lahir'])} (umur {p2['umur']} tahun)
-Agama \t\t: Islam
+Agama \t\t\t: Islam
 Pekerjaan \t\t: {p2['pekerjaan']}
 Pendidikan \t\t: {p2['pendidikan']}
 Nomor telepon\t\t: {p2['telepon']}
 Email\t\t\t: {p2['email']}
-Alamat\t\t: {p2['alamat']}, selanjutnya disebut sebagai Pemohon II;
+Alamat\t\t\t: {p2['alamat']}, selanjutnya disebut sebagai Pemohon II;
 
 Dengan ini mengajukan pemohonan pengesahan nikah, dengan alasan sebagai berikut:
 
@@ -122,7 +122,12 @@ Demikian permohonan para Pemohon, dan atas terkabulnya para Pemohon ucapkan teri
 Wassalam
 
 
-Pemohon I, {p1['nama']} \t\t\t\t\tPemohon II, {p2['nama']}
+        Pemohon I,                                          Pemohon II,
+
+
+
+
+       {p1['nama']}                                         {p2['nama']}
 """
     return text
 
@@ -140,10 +145,10 @@ def generate_docx(data):
     
     # Page setup
     for section in doc.sections:
-        section.top_margin = Inches(1)
-        section.bottom_margin = Inches(1)
-        section.left_margin = Inches(1)
-        section.right_margin = Inches(1)
+        section.top_margin = Cm(3)
+        section.left_margin = Cm(4)
+        section.right_margin = Cm(2)
+        section.bottom_margin = Cm(3)
 
     p1 = data['p1']
     p2 = data['p2']
@@ -164,12 +169,12 @@ def generate_docx(data):
             f"Nama\t\t\t: {applicant['nama']}\n"
             f"NIK\t\t\t: {applicant['nik']}\n"
             f"Tempat Tgl Lahir\t: {applicant['tempat_lahir']}, {format_indo_date(applicant['tgl_lahir'])} (umur {applicant['umur']} tahun)\n"
-            f"Agama\t\t: Islam\n"
+            f"Agama\t\t\t: Islam\n"
             f"Pekerjaan\t\t: {applicant['pekerjaan']}\n"
             f"Pendidikan\t\t: {applicant['pendidikan']}\n"
             f"Nomor telepon\t: {applicant['telepon']}\n"
             f"Email\t\t\t: {applicant['email']}\n"
-            f"Alamat\t\t: {applicant['alamat']}, selanjutnya disebut sebagai {title};\n"
+            f"Alamat\t\t\t: {applicant['alamat']}, selanjutnya disebut sebagai {title};\n"
         )
         p.add_run(fmt)
 
@@ -241,8 +246,12 @@ def generate_docx(data):
     cell_1 = table.cell(0, 0)
     cell_2 = table.cell(0, 1)
     
+    # Set title to center
     cell_1.paragraphs[0].text = "Pemohon I,"
+    cell_1.paragraphs[0].alignment = WD_ALIGN_PARAGRAPH.CENTER
+    
     cell_2.paragraphs[0].text = "Pemohon II,"
+    cell_2.paragraphs[0].alignment = WD_ALIGN_PARAGRAPH.CENTER
     
     # Add empty spacing for signature
     table.cell(1, 0).paragraphs[0].add_run("\n\n")
@@ -250,8 +259,12 @@ def generate_docx(data):
     cell_1_name = table.cell(2, 0)
     cell_2_name = table.cell(2, 1)
     
+    # Set names to center
     cell_1_name.paragraphs[0].text = p1['nama']
+    cell_1_name.paragraphs[0].alignment = WD_ALIGN_PARAGRAPH.CENTER
+    
     cell_2_name.paragraphs[0].text = p2['nama']
+    cell_2_name.paragraphs[0].alignment = WD_ALIGN_PARAGRAPH.CENTER
 
     buffer = BytesIO()
     doc.save(buffer)
