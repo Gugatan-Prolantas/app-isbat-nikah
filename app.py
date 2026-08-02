@@ -346,52 +346,45 @@ def generate_docx(data):
     doc.add_paragraph("Assalamu Alaikum Wr. Wb.")
     doc.add_paragraph("Dengan hormat,\nYang bertanda tangan di bawah ini :")
 
-    # Format Biodata dengan tabel
-    table_bio = doc.add_table(rows=0, cols=3)
-    table_bio.autofit = False 
-    table_bio.allow_autofit = False # Ekstra pengamanan ganda untuk mematikan autofit Word
-    
-    def add_bio_row(label, value):
-        row_cells = table_bio.add_row().cells
-        row_cells[0].text = label
+    # Format Biodata dengan model Paragraf (Hanging Indent dan Tab Stops)
+    def add_bio_p(label, value):
+        p = doc.add_paragraph()
+        p.alignment = WD_ALIGN_PARAGRAPH.JUSTIFY
         
-        # Kolom titik dua diatur ke tengah (center)
-        row_cells[1].text = ":"
-        row_cells[1].paragraphs[0].alignment = WD_ALIGN_PARAGRAPH.CENTER
+        # Mengatur agar baris kedua (jika teks sangat panjang) sejajar di posisi 4.5 cm
+        p.paragraph_format.left_indent = Cm(4.5)
+        # Menarik kembali label (baris pertama) agar menempel ke margin paling kiri (0 cm)
+        p.paragraph_format.first_line_indent = Cm(-4.5)
         
-        # Kolom isi data diatur rata kiri-kanan (justify)
-        row_cells[2].text = value
-        row_cells[2].paragraphs[0].alignment = WD_ALIGN_PARAGRAPH.JUSTIFY
+        # Kunci posisi Tab secara absolut (seperti mengatur ruler di Word)
+        tab_stops = p.paragraph_format.tab_stops
+        tab_stops.add_tab_stop(Cm(4.0)) # Tombol Tab 1: Menuju posisi 4.0 cm (untuk Titik Dua)
+        tab_stops.add_tab_stop(Cm(4.5)) # Tombol Tab 2: Menuju posisi 4.5 cm (untuk Awal Teks)
+        
+        # Susunan: [Label] -> Tab -> [:] -> Tab -> [Isi Data]
+        p.add_run(f"{label}\t:\t{value}")
 
-    add_bio_row("Nama", p1['nama'])
-    add_bio_row("NIK", p1['nik'])
-    add_bio_row("Tempat Tgl Lahir", f"{p1['tempat_lahir']}, {format_indo_date(p1['tgl_lahir'])} (umur {p1['umur']} tahun)")
-    add_bio_row("Agama", "Islam")
-    add_bio_row("Pekerjaan", p1['pekerjaan'])
-    add_bio_row("Pendidikan", p1['pendidikan'])
-    add_bio_row("Nomor telepon", p1['telepon'])
-    add_bio_row("Email", p1['email'])
-    add_bio_row("Alamat", f"{p1['alamat']}, selanjutnya disebut sebagai Pemohon I;")
-    table_bio.add_row()
-    add_bio_row("Nama", p2['nama'])
-    add_bio_row("NIK", p2['nik'])
-    add_bio_row("Tempat Tgl Lahir", f"{p2['tempat_lahir']}, {format_indo_date(p2['tgl_lahir'])} (umur {p2['umur']} tahun)")
-    add_bio_row("Agama", "Islam")
-    add_bio_row("Pekerjaan", p2['pekerjaan'])
-    add_bio_row("Pendidikan", p2['pendidikan'])
-    add_bio_row("Nomor telepon", p2['telepon'])
-    add_bio_row("Email", p2['email'])
-    add_bio_row("Alamat", f"{p2['alamat']}, selanjutnya disebut sebagai Pemohon II;")
-
-    # TRIK AMPUH: Kunci paksa ukuran lebar tiap baris & sel SETELAH semua data terisi
-    widths = (Cm(4.0), Cm(0.5), Cm(10.5))
+    add_bio_p("Nama", p1['nama'])
+    add_bio_p("NIK", p1['nik'])
+    add_bio_p("Tempat Tgl Lahir", f"{p1['tempat_lahir']}, {format_indo_date(p1['tgl_lahir'])} (umur {p1['umur']} tahun)")
+    add_bio_p("Agama", "Islam")
+    add_bio_p("Pekerjaan", p1['pekerjaan'])
+    add_bio_p("Pendidikan", p1['pendidikan'])
+    add_bio_p("Nomor telepon", p1['telepon'])
+    add_bio_p("Email", p1['email'])
+    add_bio_p("Alamat", f"{p1['alamat']}, selanjutnya disebut sebagai Pemohon I;")
     
-    for row in table_bio.rows:
-        for idx, width in enumerate(widths):
-            row.cells[idx].width = width
-            
-    for col, width in zip(table_bio.columns, widths):
-        col.width = width
+    doc.add_paragraph() # Memberikan spasi jarak antara Pemohon I dan Pemohon II
+    
+    add_bio_p("Nama", p2['nama'])
+    add_bio_p("NIK", p2['nik'])
+    add_bio_p("Tempat Tgl Lahir", f"{p2['tempat_lahir']}, {format_indo_date(p2['tgl_lahir'])} (umur {p2['umur']} tahun)")
+    add_bio_p("Agama", "Islam")
+    add_bio_p("Pekerjaan", p2['pekerjaan'])
+    add_bio_p("Pendidikan", p2['pendidikan'])
+    add_bio_p("Nomor telepon", p2['telepon'])
+    add_bio_p("Email", p2['email'])
+    add_bio_p("Alamat", f"{p2['alamat']}, selanjutnya disebut sebagai Pemohon II;")
 
     doc.add_paragraph("\nDengan ini mengajukan pemohonan pengesahan nikah, dengan alasan sebagai berikut:")
 
