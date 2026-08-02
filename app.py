@@ -4,6 +4,7 @@ from io import BytesIO
 import sqlite3
 import json
 import os
+import base64
 import smtplib
 from email.mime.multipart import MIMEMultipart
 from email.mime.base import MIMEBase
@@ -116,22 +117,45 @@ def apply_custom_theme():
             padding: 20px;
             border-radius: 10px;
             border-bottom: 4px solid #D4AF37;
-            text-align: center;
             margin-bottom: 20px;
             box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-wrap: wrap; /* Menjaga agar tetap rapi di layar HP */
+            gap: 25px;
+        }
+        .banner-logo {
+            height: 100px; /* Ukuran logo disesuaikan agar proporsional */
+            width: auto;
+            filter: drop-shadow(2px 4px 6px rgba(0,0,0,0.4)); /* Efek bayangan pada logo */
+        }
+        .header-text-container {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            text-align: left;
+        }
+        @media (max-width: 600px) {
+            .header-text-container {
+                text-align: center;
+                align-items: center;
+            }
         }
         .header-title {
-            color: #D4AF37;
+            color: #FFD700 !important; /* Kuning Emas Terang memaksa override warna H1 */
             font-size: 2.2rem;
             font-weight: bold;
             margin: 0;
             font-family: 'Georgia', serif;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3); /* Efek bayangan gelap agar teks lebih menonjol (pop out) */
         }
         .header-subtitle {
-            color: #EBF3EE;
+            color: #FFFFFF !important; /* Putih bersih agar sangat kontras dibaca */
             font-size: 1.1rem;
             margin-top: 5px;
             font-style: italic;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.2);
         }
     </style>
     """
@@ -438,11 +462,22 @@ def generate_docx(data):
     buffer.seek(0)
     return buffer
 
-# Banner Kustom untuk Header Aplikasi
-st.markdown("""
+# --- Banner Kustom untuk Header Aplikasi ---
+logo_path = "logo PA Pwt.jpg"
+logo_html = '<span style="font-size: 4rem;">⚖️</span>' # Fallback jika gambar tidak ditemukan
+
+if os.path.exists(logo_path):
+    with open(logo_path, "rb") as image_file:
+        encoded_string = base64.b64encode(image_file.read()).decode()
+    logo_html = f'<img src="data:image/jpeg;base64,{encoded_string}" class="banner-logo" alt="Logo PA Purwokerto">'
+
+st.markdown(f"""
     <div class="header-banner">
-        <h1 class="header-title">⚖️ Aplikasi Permohonan Isbat Nikah</h1>
-        <p class="header-subtitle">Aplikasi Pembantu Pembuatan Permohonan Isbat Nikah</p>
+        {logo_html}
+        <div class="header-text-container">
+            <h1 class="header-title">Aplikasi Permohonan Isbat Nikah</h1>
+            <p class="header-subtitle">Aplikasi Pembantu Pembuatan Permohonan Isbat Nikah</p>
+        </div>
     </div>
 """, unsafe_allow_html=True)
 
