@@ -1,0 +1,11 @@
+# Mengabaikan file database (agar data user tidak bocor)
+*.db
+*.sqlite3
+
+# Mengabaikan folder Streamlit Secrets (agar password aman)
+.streamlit/
+
+# Mengabaikan folder environment (opsional/umum)
+__pycache__/
+venv/
+env/
