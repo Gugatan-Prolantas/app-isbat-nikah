@@ -45,13 +45,13 @@ def build_letter_text(data):
     tgl_surat_str = format_indo_date(data['tgl_permohonan'])
     
     # Anak text
-    anak_str = "belum / tidak dikaruniai anak."
+    anak_str = "belum / tidak dikaruniai anak;"
     if data['status_anak'] == 'sudah' and data['anak_list']:
         anak_lines = [f"telah dikaruniai {len(data['anak_list'])} orang anak, yaitu:"]
         for idx, child in enumerate(data['anak_list'], 1):
             c_ttl = f"{child['tempat']}, {format_indo_date(child['tgl_lahir'])}"
             anak_lines.append(f"    {idx}. {child['nama']}, tempat/tgl lahir: {c_ttl} (umur {child['umur']} tahun)")
-        anak_str = "\n".join(anak_lines)
+        anak_str = "\n".join(anak_lines) + ";"
 
     # Wali text
     alasan_wali_str = f" {data['alasan_wali']}" if data['hubungan_wali'] != 'Ayah Kandung' and data['alasan_wali'] else ""
@@ -93,14 +93,19 @@ Nomor telepon\t\t: {p2['telepon']}
 Email\t\t\t: {p2['email']}
 Alamat\t\t\t: {p2['alamat']}, selanjutnya disebut sebagai Pemohon II;
 
-Dengan ini mengajukan permohonan isbat nikah, dengan alasan sebagai berikut:
+Dengan ini mengajukan pemohonan pengesahan nikah, dengan alasan sebagai berikut:
 
-1.\tBahwa Pemohon I dan Pemohon II telah menikah menurut agama Islam pada tanggal {format_indo_date(data['tgl_nikah'])} di {data['tempat_nikah']} dengan wali nikah adalah {wali_str}, yang dinikahkan oleh {data['yang_menikahkan']}, dengan maskawin berupa {data['mahar']}, dan dihadiri oleh dua orang saksi masing-masing bernama {data['saksi1']} dan {data['saksi2']};
-2.\tBahwa antara Pemohon I dan Pemohon II tidak ada halangan untuk melangsungkan pernikahan, baik halangan Syara’ maupun halangan undang-undang, dan tidak pernah ada yang keberatan atas pernikahan Pemohon I dengan Pemohon II;
-3.\tBahwa saat menikah Pemohon I berstatus {stat_p1} dan Pemohon II berstatus {stat_p2};
-4.\tBahwa dari pernikahan tersebut, Pemohon I dan Pemohon II {anak_str}
-5.\t{data['alasan_tidak_mencatatkan']}
-6.\tBahwa maksud permohonan isbat nikah para Pemohon adalah untuk {data['alasan_mohon']};
+Bahwa Pemohon I dan Pemohon II telah menikah menurut agama Islam pada tanggal {format_indo_date(data['tgl_nikah'])} di {data['tempat_nikah']} dengan wali nikah adalah {wali_str}, yang dinikahkan oleh {data['yang_menikahkan']}, dengan maskawin berupa {data['mahar']} yang dibayar tunai, dan dihadiri oleh dua orang saksi masing-masing bernama {data['saksi1']} dan {data['saksi2']};
+Bahwa saat menikah Pemohon I berstatus {stat_p1} dan Pemohon II berstatus {stat_p2};
+Bahwa antara Pemohon I dan Pemohon II tidak ada hubungan keluarga, baik sedarah maupun sesusuan serta Pemohon II juga tidak dalam pinangan laki-laki lain;
+Bahwa, pernikahan Pemohon I dengan Pemohon II telah dilaksanakan menurut hukum Islam serta tidak ada masyarakat yang menggugat atau yang meragukan keabsahan atau keberatan atas pernikahan Pemohon I dengan Pemohon II tersebut;
+Bahwa dari pernikahan tersebut, Pemohon I dan Pemohon II {anak_str}
+Bahwa antara Pemohon I dengan Pemohon II belum pernah terjadi perceraian;
+Bahwa, sampai sekarang Pemohon I dengan Pemohon II belum memiliki buku nikah, karena pernikahan Pemohon I dengan Pemohon II tidak terdaftar di Kantor Urusan Agama setempat;
+{data['alasan_tidak_mencatatkan']}
+Bahwa, Pemohon I tidak mempunyai isteri yang lain, selain pemohon II;
+Bahwa, sekarang Pemohon I dan Pemohon II sangat membutuhkan bukti pernikahan tersebut, untuk mengurus {data['alasan_mohon']};
+Bahwa Pemohon I dan Pemohon II bersedia menanggung segala biaya yang ditimbulkan dari pengajuan perkara ini;
 
 Bahwa berdasarkan alasan-alasan tersebut di atas para Pemohon mohon kepada Ketua Pengadilan Agama Purwokerto cq. Majelis hakim yang memeriksa perkara ini berkenan menetapkan sebagai berikut :
 
@@ -128,7 +133,6 @@ def generate_docx(data):
 
     doc = docx.Document()
     
-    # Set default font
     style = doc.styles['Normal']
     font = style.font
     font.name = 'Arial'
@@ -145,7 +149,6 @@ def generate_docx(data):
     p2 = data['p2']
     tgl_surat_str = format_indo_date(data['tgl_permohonan'])
 
-    # Header Date
     p_header = doc.add_paragraph()
     p_header.add_run(f"Hal : Permohonan Isbat Nikah\t\t\tPurwokerto, {tgl_surat_str}")
 
@@ -173,7 +176,7 @@ def generate_docx(data):
     add_biodata_docx(p1, "Pemohon I")
     add_biodata_docx(p2, "Pemohon II")
 
-    doc.add_paragraph("Dengan ini mengajukan permohonan isbat nikah, dengan alasan sebagai berikut:")
+    doc.add_paragraph("Dengan ini mengajukan pemohonan pengesahan nikah, dengan alasan sebagai berikut:")
 
     # Status details
     stat_p1 = f"{p1['status']} ({p1['detail_status_text']})" if p1['detail_status_text'] else p1['status']
@@ -184,21 +187,25 @@ def generate_docx(data):
     wali_str = f"{data['hubungan_wali']} Pemohon II bernama {data['nama_wali']}{alasan_wali_str}"
     
     # Children text
-    anak_str = "belum / tidak dikaruniai anak"
+    anak_str = "belum / tidak dikaruniai anak;"
     if data['status_anak'] == 'sudah' and data['anak_list']:
         anak_lines = [f"telah dikaruniai {len(data['anak_list'])} orang anak, yaitu:"]
         for idx, child in enumerate(data['anak_list'], 1):
             c_ttl = f"{child['tempat']}, {format_indo_date(child['tgl_lahir'])}"
             anak_lines.append(f"    {idx}. {child['nama']}, tempat/tgl lahir: {c_ttl} (umur {child['umur']} tahun)")
-        anak_str = "\n".join(anak_lines)
+        anak_str = "\n".join(anak_lines) + ";"
 
-    p_posita = doc.add_paragraph()
-    p_posita.add_run(f"1.\tBahwa Pemohon I dan Pemohon II telah menikah menurut agama Islam pada tanggal {format_indo_date(data['tgl_nikah'])} di {data['tempat_nikah']} dengan wali nikah adalah {wali_str}, yang dinikahkan oleh {data['yang_menikahkan']}, dengan maskawin berupa {data['mahar']}, dan dihadiri oleh dua orang saksi masing-masing bernama {data['saksi1']} dan {data['saksi2']};\n")
-    p_posita.add_run("2.\tBahwa antara Pemohon I dan Pemohon II tidak ada halangan untuk melangsungkan pernikahan, baik halangan Syara’ maupun halangan undang-undang, dan tidak pernah ada yang keberatan atas pernikahan Pemohon I dengan Pemohon II;\n")
-    p_posita.add_run(f"3.\tBahwa saat menikah Pemohon I berstatus {stat_p1} dan Pemohon II berstatus {stat_p2};\n")
-    p_posita.add_run(f"4.\tBahwa dari pernikahan tersebut, Pemohon I dan Pemohon II {anak_str};\n")
-    p_posita.add_run(f"5.\t{data['alasan_tidak_mencatatkan']}\n")
-    p_posita.add_run(f"6.\tBahwa maksud permohonan isbat nikah para Pemohon adalah untuk {data['alasan_mohon']};\n")
+    doc.add_paragraph(f"Bahwa Pemohon I dan Pemohon II telah menikah menurut agama Islam pada tanggal {format_indo_date(data['tgl_nikah'])} di {data['tempat_nikah']} dengan wali nikah adalah {wali_str}, yang dinikahkan oleh {data['yang_menikahkan']}, dengan maskawin berupa {data['mahar']} yang dibayar tunai, dan dihadiri oleh dua orang saksi masing-masing bernama {data['saksi1']} dan {data['saksi2']};")
+    doc.add_paragraph(f"Bahwa saat menikah Pemohon I berstatus {stat_p1} dan Pemohon II berstatus {stat_p2};")
+    doc.add_paragraph("Bahwa antara Pemohon I dan Pemohon II tidak ada hubungan keluarga, baik sedarah maupun sesusuan serta Pemohon II juga tidak dalam pinangan laki-laki lain;")
+    doc.add_paragraph("Bahwa, pernikahan Pemohon I dengan Pemohon II telah dilaksanakan menurut hukum Islam serta tidak ada masyarakat yang menggugat atau yang meragukan keabsahan atau keberatan atas pernikahan Pemohon I dengan Pemohon II tersebut;")
+    doc.add_paragraph(f"Bahwa dari pernikahan tersebut, Pemohon I dan Pemohon II {anak_str}")
+    doc.add_paragraph("Bahwa antara Pemohon I dengan Pemohon II belum pernah terjadi perceraian;")
+    doc.add_paragraph("Bahwa, sampai sekarang Pemohon I dengan Pemohon II belum memiliki buku nikah, karena pernikahan Pemohon I dengan Pemohon II tidak terdaftar di Kantor Urusan Agama setempat;")
+    doc.add_paragraph(data['alasan_tidak_mencatatkan'])
+    doc.add_paragraph("Bahwa, Pemohon I tidak mempunyai isteri yang lain, selain pemohon II;")
+    doc.add_paragraph(f"Bahwa, sekarang Pemohon I dan Pemohon II sangat membutuhkan bukti pernikahan tersebut, untuk mengurus {data['alasan_mohon']};")
+    doc.add_paragraph("Bahwa Pemohon I dan Pemohon II bersedia menanggung segala biaya yang ditimbulkan dari pengajuan perkara ini;")
 
     doc.add_paragraph("Bahwa berdasarkan alasan-alasan tersebut di atas para Pemohon mohon kepada Ketua Pengadilan Agama Purwokerto cq. Majelis hakim yang memeriksa perkara ini berkenan menetapkan sebagai berikut :")
     
