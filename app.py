@@ -128,8 +128,8 @@ def apply_custom_theme():
         .banner-logo {
             height: 115px; /* Sedikit dibesarkan agar proporsional */
             width: auto;
-            border-radius: 50%; /* Trik CSS memotong kotak putih menjadi bentuk oval */
-            border: 2.5px solid #D4AF37; /* Bingkai emas menutupi sisa pinggiran putih */
+            border-radius: 50%; /* Trik CSS memotong kotak hitam menjadi bentuk oval */
+            border: 2.5px solid #D4AF37; /* Bingkai emas menutupi sisa pinggiran */
             box-shadow: 0 4px 12px rgba(0,0,0,0.6); /* Efek bayangan tegas */
             object-fit: cover;
         }
@@ -492,7 +492,7 @@ if os.path.exists(logo_path):
     with open(logo_path, "rb") as image_file:
         encoded_string = base64.b64encode(image_file.read()).decode()
     
-    # Gunakan image/jpeg karena file sekarang bernama logo_PA_Pwt.jpg
+    # Gunakan image/jpeg untuk file .jpg
     logo_html = f'<img src="data:image/jpeg;base64,{encoded_string}" class="banner-logo" alt="Logo PA Purwokerto">'
 
 st.markdown(f"""
@@ -692,7 +692,7 @@ with col_preview:
         if sukses:
             st.success(f"Berhasil menyimpan data atas nama {nama_p1} & {nama_p2} ke database!")
         else:
-            st.error(f"Gagal menyimpan data ke database. Kendala teknis: {pesan_error_db}")
+            st.error(f"Gagal menyimpan data ke database. Kendala teknis:\n{pesan_error_db}")
             
     st.write("---")
     letter_text = build_letter_text(form_data)
