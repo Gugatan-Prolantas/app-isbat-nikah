@@ -212,9 +212,9 @@ def save_to_db(data):
         ''', (waktu_input, data['p1']['nama'], data['p1']['nik'], data['p2']['nama'], data['p2']['nik'], data_json))
         conn.commit()
         conn.close()
-        return True
+        return True, ""
     except Exception as e:
-        return False
+        return False, str(e)
 
 def load_data_db():
     try:
@@ -688,10 +688,11 @@ with col_preview:
     # ------------------------------------
 
     if st.button("💾 Simpan Data ke Database", type="primary", use_container_width=True):
-        if save_to_db(form_data):
+        sukses, pesan_error_db = save_to_db(form_data)
+        if sukses:
             st.success(f"Berhasil menyimpan data atas nama {nama_p1} & {nama_p2} ke database!")
         else:
-            st.error("Gagal menyimpan data ke database.")
+            st.error(f"Gagal menyimpan data ke database. Kendala teknis: {pesan_error_db}")
             
     st.write("---")
     letter_text = build_letter_text(form_data)
@@ -772,6 +773,24 @@ if password_input == "rahasia123":
         else:
             st.info("Belum ada data tersimpan.")
             
+    st.write("---")
+    
+    # --- FITUR BARU: TOMBOL RESET DATABASE ---
+    st.subheader("🛠️ Perbaikan Sistem")
+    st.write("Gunakan tombol ini **HANYA** jika Anda mengalami error 'Gagal menyimpan data' akibat pembaruan sistem aplikasi.")
+    if st.button("⚠️ Hapus & Reset Database", type="secondary"):
+        try:
+            conn = sqlite3.connect("isbat_nikah.db")
+            c = conn.cursor()
+            c.execute("DROP TABLE IF EXISTS permohonan") # Hapus tabel versi lama
+            conn.commit()
+            conn.close()
+            init_db() # Panggil fungsi pembuat tabel baru
+            st.success("✅ Database berhasil di-reset ke versi terbaru! Silakan refresh (muat ulang) halaman web ini.")
+        except Exception as e:
+            st.error(f"Gagal mereset database: {e}")
+    # ----------------------------------------
+    
     st.write("---")
     st.subheader("📧 Backup Database ke Email")
     st.write("Kirim file `isbat_nikah.db` langsung ke email Anda secara aman.")
