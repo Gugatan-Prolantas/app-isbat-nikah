@@ -623,14 +623,26 @@ with col_form:
                 c_umur = calculate_age(c_tgl, tgl_permohonan)
                 anak_list.append({"nama": c_nama, "tempat": c_tempat, "tgl_lahir": c_tgl, "umur": c_umur})
 
-        alasan_tidak_mencatatkan = st.selectbox(
-            "Alasan Tidak Mencatatkan Nikah",
-            [
-                "Bahwa Pemohon I dan Pemohon II telah melaporkan pernikahannya kepada kayim untuk didaftarkan pada Kantor Urusan Agama, namun kayim tersebut tidak melanjutkan pendaftarannya ke Pembantu Pegawai Pencatat Nikah Kantor Urusan Agama;",
-                "Bahwa Pemohon I dan Pemohon II telah melaporkan pernikahannya ke Pembantu Pegawai Pencatat Nikah setempat, namun Pembantu Pegawai Pencatat Nikah tersebut tidak melaporkan pencatatan pernikahan tersebut ke Kantor Urusan Agama;",
-                "Bahwa Pemohon I dan Pemohon II tidak mendaftarkan pernikahannya ke KUA karena pertimbangan keterbatasan biaya pada saat itu;"
-            ], index=2
+        st.markdown("---")
+        opsi_alasan_nikah = {
+            "Keterbatasan Biaya": "Bahwa Pemohon I dan Pemohon II tidak mendaftarkan pernikahannya ke KUA karena pertimbangan keterbatasan biaya pada saat itu;",
+            "Kelalaian Kayim / Perangkat Desa": "Bahwa Pemohon I dan Pemohon II telah melaporkan pernikahannya kepada kayim untuk didaftarkan pada Kantor Urusan Agama, namun kayim tersebut tidak melanjutkan pendaftarannya ke Pembantu Pegawai Pencatat Nikah Kantor Urusan Agama;",
+            "Kelalaian P3N (Pembantu Pegawai Pencatat Nikah)": "Bahwa Pemohon I dan Pemohon II telah melaporkan pernikahannya ke Pembantu Pegawai Pencatat Nikah setempat, namun Pembantu Pegawai Pencatat Nikah tersebut tidak melaporkan pencatatan pernikahan tersebut ke Kantor Urusan Agama;",
+            "Lainnya (Ketik Manual)": "Bahwa "
+        }
+        
+        pilihan_alasan_singkat = st.radio(
+            "Pilih Alasan Tidak Mencatatkan Nikah:",
+            list(opsi_alasan_nikah.keys())
         )
+        
+        if pilihan_alasan_singkat == "Lainnya (Ketik Manual)":
+            alasan_tidak_mencatatkan = st.text_area("Ketikkan alasan secara rinci di sini:", value=opsi_alasan_nikah[pilihan_alasan_singkat])
+        else:
+            alasan_tidak_mencatatkan = opsi_alasan_nikah[pilihan_alasan_singkat]
+            st.info(f"💡 **Teks yang akan tercetak di dokumen:**\n\n*{alasan_tidak_mencatatkan}*")
+            
+        st.markdown("---")
 
         pil_alasan_mohon = st.selectbox("Maksud Permohonan", ["penerbitan akta nikah Para Pemohon serta keperluan lainnya", "mengurus akta kelahiran anak Para Pemohon serta keperluan lainnya", "keperluan tersendiri"], index=1)
         alasan_mohon = pil_alasan_mohon if pil_alasan_mohon != "keperluan tersendiri" else st.text_input("Sebutkan Keperluan Anda", value="pendaftaran haji")
